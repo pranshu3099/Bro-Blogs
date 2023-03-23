@@ -123,7 +123,7 @@ const CreateBlog = () => {
         <div className="post-success-container">
           <div className="success-container">
             <div className="success">Post Submitted Successfully</div>
-            <button class="success-btn" colorScheme="green">
+            <button className="success-btn" colorScheme="green">
               <Link to="/">Home</Link>
             </button>
           </div>
