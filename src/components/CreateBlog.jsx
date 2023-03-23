@@ -1,4 +1,5 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Modal,
   ModalOverlay,
@@ -32,6 +33,7 @@ const CreateBlog = () => {
     yourblog: "",
     type: "pending",
   });
+  const [submit, setSubmit] = useState(false);
   const today = new Date();
   const monthOptions = { month: "long" };
 
@@ -41,76 +43,93 @@ const CreateBlog = () => {
       alert("please write your blog");
     }
     dispatch({ title: "", yourblog: "", type: "pending" });
+    setSubmit(true);
   };
   return (
-    <>
-      <div className="blog-container">
-        <div className="input-container">
-          <label className="title">
-            <Input
-              width={"60rem"}
-              variant="flushed"
-              type="text"
-              value={blog.title}
-              className="input"
-              placeholder="Title"
-              onChange={(e) =>
-                dispatch({ ...blog, title: e.target.value, type: "title" })
-              }
-            />
-          </label>
-        </div>
-        <div>
-          <Textarea
-            name="blog"
-            id="blog"
-            className="blog"
-            value={blog.yourblog}
-            cols="129"
-            rows="25"
-            width={"60rem"}
-            placeholder="your blog"
-            onChange={(e) =>
-              dispatch({ ...blog, yourblog: e.target.value, type: "blog" })
-            }
-          />
-        </div>
-      </div>
-      <Button
-        type="submit"
-        onClick={onOpen}
-        className="publish"
-        colorScheme="gray"
-      >
-        Publish
-      </Button>
-      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create your account</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <Text fontSize="30px">{blog.title}</Text>
-            <p>
-              {today.toLocaleDateString("en-US", monthOptions) +
-                " " +
-                today.getDate() +
-                "," +
-                " " +
-                today.getFullYear()}
-            </p>
-            <Text fontSize="15px">{blog.yourblog}</Text>
-          </ModalBody>
+    <div>
+      {!submit && (
+        <>
+          <div className="blog-container">
+            <div className="input-container">
+              <label className="title">
+                <Input
+                  width={"60rem"}
+                  variant="flushed"
+                  type="text"
+                  value={blog.title}
+                  className="input"
+                  placeholder="Title"
+                  onChange={(e) =>
+                    dispatch({ ...blog, title: e.target.value, type: "title" })
+                  }
+                />
+              </label>
+            </div>
+            <div>
+              <Textarea
+                name="blog"
+                id="blog"
+                className="blog"
+                value={blog.yourblog}
+                cols="129"
+                rows="25"
+                width={"60rem"}
+                placeholder="your blog"
+                onChange={(e) =>
+                  dispatch({ ...blog, yourblog: e.target.value, type: "blog" })
+                }
+              />
+            </div>
+          </div>
+          <Button
+            type="submit"
+            onClick={onOpen}
+            className="publish"
+            colorScheme="gray"
+          >
+            Publish
+          </Button>
+          <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Your blog</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <Text fontSize="30px">{blog.title}</Text>
+                <p>
+                  {today.toLocaleDateString("en-US", monthOptions) +
+                    " " +
+                    today.getDate() +
+                    "," +
+                    " " +
+                    today.getFullYear()}
+                </p>
+                <Text fontSize="15px">{blog.yourblog}</Text>
+              </ModalBody>
 
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
-              Submit
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+              <ModalFooter>
+                <>
+                  <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+                    Submit
+                  </Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </>
+      )}
+      {submit && (
+        <div className="post-success-container">
+          <div className="success-container">
+            <div className="success">Post Submitted Successfully</div>
+            <button class="success-btn" colorScheme="green">
+              <Link to="/">Home</Link>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
