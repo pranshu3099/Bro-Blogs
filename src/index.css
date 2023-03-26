@@ -77,6 +77,17 @@
   font-size: 44px;
 }
 
+.login-container div {
+  display: flex;
+  flex-direction: column;
+}
+.login-icons {
+  width: 1.5rem;
+  position: relative;
+  left: 31rem;
+  bottom: 3rem;
+}
+
 /*------------------ create blog success conatiner -------------------------*/
 
 .success-container {
@@ -103,4 +114,26 @@
   height: 37px;
   border: 3px solid green;
   font-weight: bold;
+}
+
+/* ----------------------- signup page ------------------- */
+
+.sign-up-icons {
+  width: 1.5rem;
+  position: relative;
+  left: 62%;
+  bottom: 3rem;
+  cursor: pointer;
+}
+
+.signup {
+  height: 13rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+.signup-h1 {
+  /* color: white; */
+  font-family: var(--font-family);
+  font-size: 27px;
 }
