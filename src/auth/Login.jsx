@@ -1,4 +1,6 @@
 import blog from "/media/pranshu/My Passport/my-blog/src/images/blog.jpg";
+import email from "/media/pranshu/My Passport/my-blog/src/icons/email.png";
+import eye from "/media/pranshu/My Passport/my-blog/src/icons/eye.png";
 import { Input, Button } from "@chakra-ui/react";
 const Login = () => {
   return (
@@ -19,7 +21,7 @@ const Login = () => {
               margin={5}
               variant="flushed"
             />
-            <br />
+            <img src={email} alt="" className="login-icons" />
             <Input
               type="Password"
               placeholder="password"
@@ -27,9 +29,9 @@ const Login = () => {
               margin={5}
               variant="flushed"
             />{" "}
-            <br />
+            <img src={eye} alt="" className="login-icons" />
             <Button colorScheme="blue" mr={3}>
-              Submit
+              Login
             </Button>
           </div>
         </div>
