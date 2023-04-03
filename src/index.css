@@ -137,3 +137,13 @@
   font-family: var(--font-family);
   font-size: 27px;
 }
+
+/*--------------------------- password validation section ---------------------- */
+
+.password {
+  color: red;
+  display: flex;
+  font-size: 12px;
+  justify-content: center;
+  font-family: system-ui;
+}
