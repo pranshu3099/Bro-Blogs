@@ -5,6 +5,7 @@ import phone from "/media/pranshu/My Passport/my-blog/src/icons/phone.png";
 import eye from "/media/pranshu/My Passport/my-blog/src/icons/eye.png";
 import { useReducer, useEffect, useState } from "react";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
 
 const Signup = () => {
   const password_validate = (password) => {
@@ -15,16 +16,55 @@ const Signup = () => {
       /(?=.*[0-9])/.test(password)
     );
   };
+
+  const mobileValidate = (number) => {
+    return /(?=.{10}$)/.test(number);
+  };
+
+  const emailValidate = (text) => {
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(text);
+  };
+
+  const name_validate = (name) => {
+    return /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/.test(name);
+  };
+
   const signupReducer = (data, action) => {
     switch (action.type) {
       case "pending":
         return data;
       case "name":
-        return { ...data, name: action.name };
+        if (!name_validate(action.name)) {
+          return {
+            ...data,
+            name: action.name,
+            nameValidation: action.nameValidation,
+          };
+        }
+        return { ...data, name: action.name, nameValidation: false };
       case "mobile_number":
-        return { ...data, mobile_number: action.mobile_number };
+        if (!mobileValidate(action.mobile_number)) {
+          return {
+            ...data,
+            mobile_number: action.mobile_number,
+            mobileVerification: action.mobileVerification,
+          };
+        }
+        return {
+          ...data,
+          mobile_number: action.mobile_number,
+          mobileVerification: false,
+        };
+
       case "email":
-        return { ...data, email: action.email };
+        if (!emailValidate(action.email)) {
+          return {
+            ...data,
+            email: action.email,
+            emailVerification: action.emailVerification,
+          };
+        }
+        return { ...data, email: action.email, emailVerification: false };
       case "password":
         if (!password_validate(action.password)) {
           return {
@@ -70,8 +110,12 @@ const Signup = () => {
     passwordvalidate: false,
     confimpasswordvalidate: false,
     matchpassword: false,
+    mobileVerification: false,
+    emailVerification: false,
+    nameValidation: false,
   });
-
+  const [requiredFields, setRequireFields] = useState({});
+  const [auth, setAuth] = useState(false);
   const showPassword = (e) => {
     const password = document.getElementById("password");
     const cnfpassword = document.getElementById("confirm_password");
@@ -86,18 +130,45 @@ const Signup = () => {
     }
   };
 
-  function fetchdata() {
+  async function fetchdata() {
     axios
       .post("http://127.0.0.1:8000/api/auth/register", data)
       .then((response) => {
-        console.log(response);
+        return response;
       })
       .catch((err) => console.log(err));
   }
 
+  function checkRequiredfields(info) {
+    const res = {};
+    Object.keys(info).forEach((key) => {
+      if (info[key] === "") {
+        res[key] = true;
+      }
+    });
+    if (Object.keys(res).length) {
+      setRequireFields(res);
+      return false;
+    } else {
+      setRequireFields({});
+      return true;
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchdata();
+    const info = {
+      name: data.name,
+      password: data.password,
+      password_confirmation: data.password_confirmation,
+      email: data.email,
+      mobile_number: data.mobile_number,
+    };
+    if (checkRequiredfields(info)) {
+      if (fetchdata()) {
+        setAuth(true);
+      }
+    }
   };
   return (
     <>
@@ -118,10 +189,21 @@ const Signup = () => {
               name="name"
               value={data.name}
               onChange={(e) => {
-                dispatch({ ...data, name: e.target.value, type: "name" });
+                dispatch({
+                  ...data,
+                  name: e.target.value,
+                  type: "name",
+                  nameValidation: true,
+                });
               }}
             />
             <img className="sign-up-icons" src={user} alt="" />
+            {data.nameValidation && (
+              <div style={{ color: "red" }}>Invalid Name</div>
+            )}
+            {requiredFields.name && (
+              <div style={{ color: "red" }}>Name field is required</div>
+            )}
             <Input
               type="number"
               placeholder="mobile number"
@@ -135,9 +217,18 @@ const Signup = () => {
                   ...data,
                   mobile_number: e.target.value,
                   type: "mobile_number",
+                  mobileVerification: true,
                 });
               }}
             />
+            {data.mobileVerification && (
+              <div style={{ color: "red" }}>
+                Mobile number must be of 10 digits
+              </div>
+            )}
+            {requiredFields.mobile_number && (
+              <div style={{ color: "red" }}> Mobile number is required</div>
+            )}
             <img className="sign-up-icons" src={phone} alt="" />
             <Input
               type="email"
@@ -148,9 +239,20 @@ const Signup = () => {
               name="email"
               value={data.email}
               onChange={(e) => {
-                dispatch({ ...data, email: e.target.value, type: "email" });
+                dispatch({
+                  ...data,
+                  email: e.target.value,
+                  type: "email",
+                  emailVerification: true,
+                });
               }}
             />
+            {data.emailVerification && (
+              <div style={{ color: "red" }}>Invalid email address</div>
+            )}
+            {requiredFields.email && (
+              <div style={{ color: "red" }}>email address is required</div>
+            )}
             <img className="sign-up-icons" src={email} alt="" />
             <Input
               id="password"
@@ -186,6 +288,9 @@ const Signup = () => {
                   <p>password atleast contain a number</p>
                 </div>
               </div>
+            )}
+            {requiredFields.password && (
+              <div style={{ color: "red" }}> The password field is rquired</div>
             )}
             <Input
               type="Password"
@@ -225,12 +330,18 @@ const Signup = () => {
             {data.matchpassword && (
               <div className="password">Password does not match</div>
             )}
+            {requiredFields.password_confirmation && (
+              <div style={{ color: "red" }}>
+                The cofirm password field is rquired
+              </div>
+            )}
             <Button colorScheme="blue" mr={3} mt={3} onClick={handleSubmit}>
               Signup
             </Button>
           </div>
         </div>
       </form>
+      {auth && <Navigate to="/Login" />}
     </>
   );
 };
