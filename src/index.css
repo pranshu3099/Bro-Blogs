@@ -20,6 +20,8 @@
   display: flex;
   gap: 1rem;
   text-decoration: none;
+  height: 14vh;
+  align-items: center;
 }
 
 .icons {
@@ -28,10 +30,17 @@
 }
 
 .blog-container {
-  /* background-color: red; */
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
+  height: 84vh;
   gap: 1rem;
+}
+
+.blog-main-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 .input {
@@ -48,7 +57,12 @@
 .publish {
   margin-top: 6px;
 }
-
+.nav-main-container {
+  display: flex;
+  width: 400%;
+  justify-content: space-around;
+  align-items: center;
+}
 /* -------------------- LOGIN -------------------------------- */
 
 .login {
@@ -86,6 +100,7 @@
   position: relative;
   left: 31rem;
   bottom: 3rem;
+  cursor: pointer;
 }
 
 /*------------------ create blog success conatiner -------------------------*/
@@ -147,3 +162,26 @@
   justify-content: center;
   font-family: system-ui;
 }
+
+/*--------------------- my profile-------------- */
+
+.profile-icon {
+  display: none;
+}
+
+/* #profile-icon-container {
+  background-color: rgb(253, 240, 222);
+  position: absolute;
+  height: 34vh;
+  width: 21vh;
+  display: flex;
+} */
+
+.profile-icon-sub-container img {
+  width: 4px;
+}
+/* .profile-icon-sub-container {
+  display: flex;
+  justify-content: center;
+  gap: 1vh;
+} */
