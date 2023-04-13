@@ -3,6 +3,7 @@ import user from "/media/pranshu/My Passport/my-blog/src/icons/user.png";
 import email from "/media/pranshu/My Passport/my-blog/src/icons/email.png";
 import phone from "/media/pranshu/My Passport/my-blog/src/icons/phone.png";
 import eye from "/media/pranshu/My Passport/my-blog/src/icons/eye.png";
+import hidden from "/media/pranshu/My Passport/my-blog/src/icons/hidden.png";
 import { useReducer, useEffect, useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
@@ -116,27 +117,43 @@ const Signup = () => {
   });
   const [requiredFields, setRequireFields] = useState({});
   const [auth, setAuth] = useState(false);
+
+  const changeIcon = (e, icon) => {
+    if (icon === eye) {
+      e.target.attributes.src.textContent = hidden;
+    } else {
+      e.target.attributes.src.textContent = eye;
+    }
+  };
+
   const showPassword = (e) => {
     const password = document.getElementById("password");
     const cnfpassword = document.getElementById("confirm_password");
+    const icon = e.target.attributes.src.textContent;
     if (e.target.id === "password-icon") {
+      changeIcon(e, icon);
       const type =
         password.getAttribute("type") === "Password" ? "text" : "Password";
       password.setAttribute("type", type);
     } else if (e.target.id === "cnf-password-icon") {
+      changeIcon(e, icon);
       const cnftype =
         cnfpassword.getAttribute("type") === "Password" ? "text" : "Password";
       cnfpassword.setAttribute("type", cnftype);
     }
   };
 
-  async function fetchdata() {
+  function fetchdata(info) {
     axios
-      .post("http://127.0.0.1:8000/api/auth/register", data)
+      .post("http://127.0.0.1:8000/api/auth/register", info)
       .then((response) => {
-        return response;
+        if (response.status === 200) {
+          setAuth(true);
+        }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   function checkRequiredfields(info) {
@@ -165,9 +182,7 @@ const Signup = () => {
       mobile_number: data.mobile_number,
     };
     if (checkRequiredfields(info)) {
-      if (fetchdata()) {
-        setAuth(true);
-      }
+      fetchdata(info);
     }
   };
   return (
@@ -318,7 +333,7 @@ const Signup = () => {
               onClick={showPassword}
             />
             {data.confimpasswordvalidate && (
-              <div className="password">
+              <div className="password" style={{ marginBottom: "5px" }}>
                 <div>
                   <p>Password should contain at least one capital char</p>
                   <p>The length of the password should be bewteen 7 to 12</p>
