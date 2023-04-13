@@ -1,5 +1,8 @@
-import { useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { Link } from "react-router-dom";
+import useFetch from "./UseFetch";
+import { useAuthContext } from "../context/Provider";
+import axios from "axios";
 import {
   Modal,
   ModalOverlay,
@@ -13,8 +16,17 @@ import {
   useDisclosure,
   Input,
   Textarea,
+  Select,
 } from "@chakra-ui/react";
 const CreateBlog = () => {
+  const { data, err } = useFetch(
+    "http://127.0.0.1:8000/api/categories/getcategories",
+    "",
+    "GET"
+  );
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const { responseData } = useAuthContext();
+  console.log(responseData);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const blogReducer = (state, action) => {
     switch (action.type) {
@@ -24,6 +36,8 @@ const CreateBlog = () => {
         return { ...state, title: action.title };
       case "blog":
         return { ...state, yourblog: action.yourblog };
+      case "resolved":
+        return action;
       default:
         throw new Error("error");
     }
@@ -42,14 +56,39 @@ const CreateBlog = () => {
     if (blog.title === "" && blog.yourblog === "") {
       alert("please write your blog");
     }
-    dispatch({ title: "", yourblog: "", type: "pending" });
-    setSubmit(true);
+    dispatch({ title: "", yourblog: "", type: "resolved" });
+    let data = {
+      title: blog.title,
+      content: blog.yourblog,
+      user_id: responseData.data.original.user.id,
+      category_id: selectedCategory,
+    };
+    console.log(data);
+    axios
+      .post("http://127.0.0.1:8000/api/posts/createposts", data)
+      .then((response) => {
+        if (response.status === 200) {
+          setSubmit(true);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value);
   };
   return (
-    <div>
-      {!submit && (
+    <div className="blog-main-container">
+      {
         <>
           <div className="blog-container">
+            {data && (
+              <SelectCategories
+                category={data}
+                onChange={handleCategoryChange}
+              />
+            )}
             <div className="input-container">
               <label className="title">
                 <Input
@@ -118,7 +157,7 @@ const CreateBlog = () => {
             </ModalContent>
           </Modal>
         </>
-      )}
+      }
       {submit && (
         <div className="post-success-container">
           <div className="success-container">
@@ -130,6 +169,30 @@ const CreateBlog = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const SelectCategories = ({ category, onChange }) => {
+  const handleChange = useCallback(
+    (e) => {
+      onChange(e.target.value);
+    },
+    [onChange]
+  );
+  return (
+    <>
+      <select onChange={handleChange}>
+        <option value="">Select a category</option>
+        {category.map((cat) => {
+          return (
+            <option key={cat.slug} value={cat.slug}>
+              {cat.category_name}
+            </option>
+          );
+        })}
+      </select>
+      ;
+    </>
   );
 };
 
