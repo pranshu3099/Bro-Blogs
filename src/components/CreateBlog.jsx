@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import useFetch from "./UseFetch";
 import { useAuthContext } from "../context/Provider";
 import axios from "axios";
+import Home from "./Home";
 import {
   Modal,
   ModalOverlay,
@@ -26,7 +27,6 @@ const CreateBlog = () => {
   );
   const [selectedCategory, setSelectedCategory] = useState("");
   const { responseData } = useAuthContext();
-  console.log(responseData);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const blogReducer = (state, action) => {
     switch (action.type) {
@@ -63,9 +63,13 @@ const CreateBlog = () => {
       user_id: responseData.data.original.user.id,
       category_id: selectedCategory,
     };
-    console.log(data);
+    let bearer = localStorage.getItem("Bearer");
+    const headers = {
+      Authorization: `Bearer ${bearer}`,
+      "Content-Type": "application/json",
+    };
     axios
-      .post("http://127.0.0.1:8000/api/posts/createposts", data)
+      .post("http://127.0.0.1:8000/api/posts/createposts", data, { headers })
       .then((response) => {
         if (response.status === 200) {
           setSubmit(true);
@@ -128,46 +132,43 @@ const CreateBlog = () => {
           >
             Publish
           </Button>
-          <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Your blog</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody pb={6}>
-                <Text fontSize="30px">{blog.title}</Text>
-                <p>
-                  {today.toLocaleDateString("en-US", monthOptions) +
-                    " " +
-                    today.getDate() +
-                    "," +
-                    " " +
-                    today.getFullYear()}
-                </p>
-                <Text fontSize="15px">{blog.yourblog}</Text>
-              </ModalBody>
+          {!submit && (
+            <Modal
+              closeOnOverlayClick={false}
+              isOpen={isOpen}
+              onClose={onClose}
+            >
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Your blog</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody pb={6}>
+                  <Text fontSize="30px">{blog.title}</Text>
+                  <p>
+                    {today.toLocaleDateString("en-US", monthOptions) +
+                      " " +
+                      today.getDate() +
+                      "," +
+                      " " +
+                      today.getFullYear()}
+                  </p>
+                  <Text fontSize="15px">{blog.yourblog}</Text>
+                </ModalBody>
 
-              <ModalFooter>
-                <>
-                  <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
-                    Submit
-                  </Button>
-                  <Button onClick={onClose}>Cancel</Button>
-                </>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
+                <ModalFooter>
+                  <>
+                    <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+                      Submit
+                    </Button>
+                    <Button onClick={onClose}>Cancel</Button>
+                  </>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+          )}
         </>
       }
-      {submit && (
-        <div className="post-success-container">
-          <div className="success-container">
-            <div className="success">Post Submitted Successfully</div>
-            <button className="success-btn" colorScheme="green">
-              <Link to="/">Home</Link>
-            </button>
-          </div>
-        </div>
-      )}
+      {submit && <Navigate to="/" />}
     </div>
   );
 };
