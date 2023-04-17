@@ -192,7 +192,6 @@ const SelectCategories = ({ category, onChange }) => {
           );
         })}
       </select>
-      ;
     </>
   );
 };
