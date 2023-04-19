@@ -137,7 +137,7 @@
 .sign-up-icons {
   width: 1.5rem;
   position: relative;
-  left: 62%;
+  left: 90%;
   bottom: 3rem;
   cursor: pointer;
 }
@@ -152,6 +152,15 @@
   /* color: white; */
   font-family: var(--font-family);
   font-size: 27px;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+}
+
+.signup-btn {
+  text-align: center;
 }
 
 /*--------------------------- password validation section ---------------------- */
