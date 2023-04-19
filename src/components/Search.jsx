@@ -4,7 +4,7 @@ import axios from "axios";
 import { useAuthContext } from "../context/Provider";
 
 const Search = () => {
-  let { searchBlog, setSearchBlog } = useAuthContext();
+  let { searchUser, setSearchUser } = useAuthContext();
   const [bearer, setBearer] = useState(() => {
     localStorage.getItem("Bearer");
   });
@@ -27,11 +27,11 @@ const Search = () => {
 
   const handleChange = (e) => {
     let debouncerTimeId;
-    setSearchBlog(e.target.value);
+    setSearchUser(e.target.value);
     clearTimeout(debouncerTimeId);
     debouncerTimeId = setTimeout(() => {
       axios
-        .get("http://127.0.0.1:8000/api/search/searchuser?q=" + searchBlog, {
+        .get("http://127.0.0.1:8000/api/search/searchuser?q=" + searchUser, {
           headers,
         })
         .then((res) => {
@@ -50,7 +50,7 @@ const Search = () => {
           variant="filled"
           type="text"
           placeholder="search technocrats press ctr+k"
-          value={searchBlog}
+          value={searchUser}
           id="search-box"
           onChange={handleChange}
         />
