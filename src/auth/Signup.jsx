@@ -192,7 +192,7 @@ const Signup = () => {
           Hey there!! Welcome to Bro Blogs sign-up and start writing your blog
         </h1>
       </div>
-      <form action="">
+      <form action="" className="form">
         <div className="signup-container">
           <div>
             <Input
@@ -350,9 +350,11 @@ const Signup = () => {
                 The cofirm password field is rquired
               </div>
             )}
-            <Button colorScheme="blue" mr={3} mt={3} onClick={handleSubmit}>
-              Signup
-            </Button>
+            <div className="signup-btn">
+              <Button colorScheme="blue" mr={3} mt={3} onClick={handleSubmit}>
+                Signup
+              </Button>
+            </div>
           </div>
         </div>
       </form>
