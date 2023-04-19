@@ -4,6 +4,7 @@ const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(false);
   const [responseData, setRes] = useState({});
   const [isloggedout, setIsLoggedOut] = useState(false);
+  const [searchUser, setSearchUser] = useState("");
   return (
     <AuthContext.Provider
       value={{
@@ -13,6 +14,8 @@ const AuthProvider = ({ children }) => {
         setRes,
         isloggedout,
         setIsLoggedOut,
+        searchUser,
+        setSearchUser,
       }}
     >
       {children}
