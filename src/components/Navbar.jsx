@@ -12,7 +12,6 @@ const Navbar = () => {
       <>
         {auth && (
           <div className="nav-main-container">
-            <Search />
             <div className="nav-icons">
               <Link to="/" className="icons">
                 Home
@@ -24,6 +23,7 @@ const Navbar = () => {
                 Write Blog
               </Link>
               <Profile />
+              <Search />
             </div>
           </div>
         )}
