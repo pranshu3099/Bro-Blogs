@@ -20,10 +20,17 @@ import {
   Select,
 } from "@chakra-ui/react";
 const CreateBlog = () => {
+  const getBearerToken = () => localStorage.getItem("Bearer");
+  const [bearer] = useState(getBearerToken);
+  const headers = {
+    Authorization: `Bearer ${bearer}`,
+    "Content-Type": "application/json",
+  };
   const { data, err } = useFetch(
     "http://127.0.0.1:8000/api/categories/getcategories",
     "",
-    "GET"
+    "GET",
+    headers
   );
   const [selectedCategory, setSelectedCategory] = useState("");
   const { responseData } = useAuthContext();
@@ -57,16 +64,13 @@ const CreateBlog = () => {
       alert("please write your blog");
     }
     dispatch({ title: "", yourblog: "", type: "resolved" });
+    let randomNum = Math.floor(Math.random() * 9000) + 1000;
     let data = {
       title: blog.title,
       content: blog.yourblog,
       user_id: responseData.data.original.user.id,
       category_id: selectedCategory,
-    };
-    let bearer = localStorage.getItem("Bearer");
-    const headers = {
-      Authorization: `Bearer ${bearer}`,
-      "Content-Type": "application/json",
+      post_id: randomNum,
     };
     axios
       .post("http://127.0.0.1:8000/api/posts/createposts", data, { headers })
