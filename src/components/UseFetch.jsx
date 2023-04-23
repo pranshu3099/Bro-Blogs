@@ -1,13 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-const useFetch = (url, info, method) => {
+const useFetch = (url, info, method, headers) => {
   const [data, setData] = useState();
   const [err, setError] = useState();
   useEffect(() => {
     switch (method) {
       case "GET":
         axios
-          .get(url)
+          .get(url, { headers })
           .then((response) => {
             if (response.status === 200) {
               setData(response.data);
