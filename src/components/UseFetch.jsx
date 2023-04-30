@@ -1,11 +1,13 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-const useFetch = (url, info, method, headers) => {
+import { useEffect, useLayoutEffect, useState } from "react";
+const useFetch = (url, info, method, headers, dependency = []) => {
   const [data, setData] = useState();
   const [err, setError] = useState();
-  useEffect(() => {
+  const [loading, setLoading] = useState(false);
+  useLayoutEffect(() => {
     switch (method) {
       case "GET":
+        setLoading(true);
         axios
           .get(url, { headers })
           .then((response) => {
@@ -15,9 +17,13 @@ const useFetch = (url, info, method, headers) => {
           })
           .catch((err) => {
             setError(err.response.data.error);
+          })
+          .finally(() => {
+            setLoading(false);
           });
         break;
       case "POST":
+        setLoading(true);
         axios
           .post(url, info)
           .then((response) => {
@@ -27,13 +33,16 @@ const useFetch = (url, info, method, headers) => {
           })
           .catch((err) => {
             setError(err.response.data.error);
+          })
+          .finally(() => {
+            setLoading(false);
           });
         break;
       default:
         throw new Error("Method is Invalid");
     }
-  }, [url, info, method]);
-  return { data, err };
+  }, [url, headers, info, method, ...dependency]);
+  return { data, err, loading };
 };
 
 export default useFetch;
