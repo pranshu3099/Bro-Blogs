@@ -7,6 +7,7 @@ import hidden from "/media/pranshu/My Passport/my-blog/src/icons/hidden.png";
 import { useReducer, useEffect, useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { useMemo } from "react";
 
 const Signup = () => {
   const password_validate = (password) => {
@@ -117,6 +118,15 @@ const Signup = () => {
   });
   const [requiredFields, setRequireFields] = useState({});
   const [auth, setAuth] = useState(false);
+  const getBearerToken = () => localStorage.getItem("Bearer");
+  const [bearer] = useState(getBearerToken);
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${bearer}`,
+      "Content-Type": "application/json",
+    }),
+    [bearer]
+  );
 
   const changeIcon = (e, icon) => {
     if (icon === eye) {
@@ -145,7 +155,7 @@ const Signup = () => {
 
   function fetchdata(info) {
     axios
-      .post("http://127.0.0.1:8000/api/auth/register", info)
+      .post("http://127.0.0.1:8000/api/auth/register", info, { headers })
       .then((response) => {
         if (response.status === 200) {
           setAuth(true);
