@@ -4,7 +4,7 @@ const useFetch = (url, info, method, headers, dependency = []) => {
   const [data, setData] = useState();
   const [err, setError] = useState();
   const [loading, setLoading] = useState(false);
-  useLayoutEffect(() => {
+  useEffect(() => {
     switch (method) {
       case "GET":
         setLoading(true);
