@@ -22,16 +22,26 @@ import {
 const CreateBlog = () => {
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
+  const [data, setData] = useState("");
   const headers = {
     Authorization: `Bearer ${bearer}`,
     "Content-Type": "application/json",
   };
-  const { data, err } = useFetch(
-    "http://127.0.0.1:8000/api/categories/getcategories",
-    "",
-    "GET",
-    headers
-  );
+
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/api/categories/getcategories", { headers })
+      .then((response) => {
+        if (response.status === 200) {
+          setData(response.data);
+          console.log(response);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState("");
   const { responseData } = useAuthContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
