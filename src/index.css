@@ -204,21 +204,24 @@
   /* border: 10px solid; */
   height: auto;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .post-container {
   /* border: 1px solid; */
-  height: 74vh;
-  width: 50%;
+  /* height: 74vh;
+  width: 50%; */
   display: flex;
   flex-direction: column;
   gap: 2em;
+  height: 22vh;
+  width: 50%;
 }
 
 .date-name-container {
   display: flex;
-  justify-content: space-around;
+  gap: 2rem;
 }
 .post-title {
   width: 40%;
