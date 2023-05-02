@@ -1,7 +1,7 @@
 import like from "/media/pranshu/My Passport/my-blog/src/icons/like.png";
 import comment from "/media/pranshu/My Passport/my-blog/src/icons/comment.png";
 import heart from "/media/pranshu/My Passport/my-blog/src/icons/heart.png";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import useFetch from "./UseFetch";
 import axios from "axios";
 import { useMemo } from "react";
@@ -27,20 +27,29 @@ const Home = () => {
     headers,
     [likes]
   );
+  console.log(data);
+  // useEffect(() => {
+  //   let likearr = localStorage.getItem("posts")
+  //   ? JSON.parse(localStorage.getItem("posts"))
+  //   : [];
+
+  //   if(likearr.length){
+
+  //   }
+  // }, []);
   function setLikedToLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
       : [];
     if (likearr.length) {
       let updatedArr = likearr.map((posts) => {
-        if (Object.keys(posts)[0] === String(post_id)) {
-          let arr = posts.post_id;
-          if (!arr) {
-            posts[Object.keys(posts)[0]] = [user_id];
-          } else {
-            arr.push(user_id);
-            posts.post_id = arr;
-          }
+        if (posts.hasOwnProperty(post_id)) {
+          let arr = posts[post_id];
+          arr.push(user_id);
+          return {
+            ...posts,
+            [post_id]: arr,
+          };
         }
         return posts;
       });
@@ -54,33 +63,33 @@ const Home = () => {
     localStorage.setItem("posts", JSON.stringify(likearr));
   }
 
-  function getLikedFromLocalStorage(user_id, post_id) {
+  function removeLikedFromLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
       : [];
 
     if (!likearr.length) return false;
-    likearr.map((posts) => {
-      if (Object.keys(posts)[0] === String(post_id)) {
+    let updatedArr = likearr.map((posts) => {
+      if (posts.hasOwnProperty(post_id)) {
         let arr = posts[post_id];
-        console.log(arr);
         let newArr = arr.filter((id) => id !== user_id);
-        posts[post_id] = newArr;
+        return {
+          ...posts,
+          [post_id]: newArr,
+        };
       }
-      console.log("hey");
       return posts;
     });
-    localStorage.setItem("posts", JSON.stringify(likearr));
+    localStorage.setItem("posts", JSON.stringify(updatedArr));
   }
 
   const handleLike = (e) => {
     let updatedCount = 0;
 
-    if (liked && getLikedFromLocalStorage(data[0].user_id, data[0].post_id)) {
+    if (liked) {
       updatedCount = 0;
       setLiked(false);
-    } else if (getLikedFromLocalStorage(data[0].user_id, data[0].post_id)) {
-      setLiked(false);
+      removeLikedFromLocalStorage(data[0].user_id, data[0].post_id);
     } else {
       updatedCount = 1;
       setLiked(true);
@@ -135,7 +144,7 @@ const BlogPosts = ({ data, onhandleLikeChange, count, handleCount, liked }) => {
       {data.map((post) => (
         <div className="post-container" key={post.id}>
           <div className="date-name-container">
-            <p>{post.user.name}</p>
+            <p>{post.name}</p>
             <p>15-april-2023</p>
           </div>
           <div className="post-title">
