@@ -1,7 +1,7 @@
 import like from "/media/pranshu/My Passport/my-blog/src/icons/like.png";
 import comment from "/media/pranshu/My Passport/my-blog/src/icons/comment.png";
 import heart from "/media/pranshu/My Passport/my-blog/src/icons/heart.png";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useLayoutEffect } from "react";
 import useFetch from "./UseFetch";
 import axios from "axios";
 import { useMemo } from "react";
@@ -12,7 +12,7 @@ const Home = () => {
   const [bearer] = useState(getBearerToken);
   const { responseData } = useAuthContext();
   const [likes, setLikes] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const [result, setResult] = useState([]);
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${bearer}`,
@@ -27,16 +27,21 @@ const Home = () => {
     headers,
     [likes]
   );
-  console.log(data);
-  // useEffect(() => {
-  //   let likearr = localStorage.getItem("posts")
-  //   ? JSON.parse(localStorage.getItem("posts"))
-  //   : [];
-
-  //   if(likearr.length){
-
-  //   }
-  // }, []);
+  useLayoutEffect(() => {
+    let likearr = localStorage.getItem("posts")
+      ? JSON.parse(localStorage.getItem("posts"))
+      : [];
+    // console.log(data);
+    if (data) {
+      const posts = likearr[0];
+      const result = [];
+      Object.keys(posts).forEach((key) => {
+        if (posts[key].includes(data[0].user_id)) result.push(true);
+        else result.push(false);
+      });
+      setResult(result);
+    }
+  }, []);
   function setLikedToLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
@@ -50,6 +55,8 @@ const Home = () => {
             ...posts,
             [post_id]: arr,
           };
+        } else {
+          posts = { ...posts, [post_id]: [user_id] };
         }
         return posts;
       });
@@ -83,40 +90,41 @@ const Home = () => {
     localStorage.setItem("posts", JSON.stringify(updatedArr));
   }
 
-  const handleLike = (e) => {
+  const handleLike = (e, post_id, user_id, count) => {
     let updatedCount = 0;
 
-    if (liked) {
+    if (e.target.attributes.src.textContent === heart) {
+      e.target.attributes.src.textContent = like;
       updatedCount = 0;
-      setLiked(false);
-      removeLikedFromLocalStorage(data[0].user_id, data[0].post_id);
+      // setLiked(false);
+      removeLikedFromLocalStorage(user_id, post_id);
     } else {
+      e.target.attributes.src.textContent = heart;
       updatedCount = 1;
-      setLiked(true);
-      setLikedToLocalStorage(data[0].user_id, data[0].post_id);
+      // setLiked(true);
+      setLikedToLocalStorage(user_id, post_id);
     }
-    if (data?.count && !loading) {
-      console.log("hey", data.count);
-      updatedCount = data.count;
-      if (liked) updatedCount++;
-      else updatedCount--;
+    if (count && !loading) {
+      if (updatedCount) {
+        updatedCount = count ? count : 0;
+        updatedCount++;
+      } else updatedCount--;
     }
     let postLikesData = {
       likes: updatedCount,
-      post_id: data[0]?.post_id,
-      user_id: responseData?.data?.original?.user?.id,
+      post_id: post_id,
+      user_id: user_id,
     };
-    axios
-      .post("http://127.0.0.1:8000/api/likeposts/likes", postLikesData, {
-        headers,
-      })
-      .then((res) => {
-        console.log(res);
-        setLikes(updatedCount);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // axios
+    //   .post("http://127.0.0.1:8000/api/likeposts/likes", postLikesData, {
+    //     headers,
+    //   })
+    //   .then((res) => {
+    //     setLikes(updatedCount);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
 
   return (
@@ -127,7 +135,7 @@ const Home = () => {
             data={data}
             onhandleLikeChange={handleLike}
             count={likes}
-            liked={liked}
+            result={result}
           />
         )}
       </div>
@@ -135,13 +143,21 @@ const Home = () => {
   );
 };
 
-const BlogPosts = ({ data, onhandleLikeChange, count, handleCount, liked }) => {
-  const handleLike = (e) => {
-    onhandleLikeChange(e);
+const BlogPosts = ({
+  data,
+  onhandleLikeChange,
+  count,
+  handleCount,
+  result,
+}) => {
+  // const isLikedArray = data[data.length - 1];
+  const handleLike = (e, post_id, user_id, count) => {
+    onhandleLikeChange(e, post_id, user_id, count);
   };
+  // console.log(result);
   return (
     <>
-      {data.map((post) => (
+      {data.map((post, index) => (
         <div className="post-container" key={post.id}>
           <div className="date-name-container">
             <p>{post.name}</p>
@@ -156,10 +172,18 @@ const BlogPosts = ({ data, onhandleLikeChange, count, handleCount, liked }) => {
           <div className="post-icons-container">
             {
               <img
-                src={liked ? heart : like}
+                src={
+                  result.length
+                    ? result[index] === false
+                      ? like
+                      : heart
+                    : like
+                }
                 alt=""
                 className="post-icons"
-                onClick={handleLike}
+                onClick={(e) =>
+                  handleLike(e, post.post_id, post.user_id, post.count)
+                }
                 id="likes"
               />
             }
