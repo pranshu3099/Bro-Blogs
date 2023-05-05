@@ -31,17 +31,24 @@ const Home = () => {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
       : [];
-    // console.log(data);
-    if (data) {
+    if (data != undefined) {
       const posts = likearr[0];
-      const result = [];
-      Object.keys(posts).forEach((key) => {
-        if (posts[key].includes(data[0].user_id)) result.push(true);
-        else result.push(false);
-      });
-      setResult(result);
+      let islikedArray = [];
+      if (posts != null) {
+        Object.keys(posts).forEach((key) => {
+          if (posts[key].includes(data[0].user_id)) islikedArray.push(true);
+          else {
+            islikedArray.push(false);
+          }
+        });
+      }
+      if (data.length > islikedArray.length) {
+        let length = data.length - islikedArray.length;
+        islikedArray = [...islikedArray, ...Array(length).fill(false)];
+      }
+      setResult(islikedArray);
     }
-  }, []);
+  }, [data]);
   function setLikedToLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
@@ -115,16 +122,16 @@ const Home = () => {
       post_id: post_id,
       user_id: user_id,
     };
-    // axios
-    //   .post("http://127.0.0.1:8000/api/likeposts/likes", postLikesData, {
-    //     headers,
-    //   })
-    //   .then((res) => {
-    //     setLikes(updatedCount);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    axios
+      .post("http://127.0.0.1:8000/api/likeposts/likes", postLikesData, {
+        headers,
+      })
+      .then((res) => {
+        setLikes(updatedCount);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -150,11 +157,9 @@ const BlogPosts = ({
   handleCount,
   result,
 }) => {
-  // const isLikedArray = data[data.length - 1];
   const handleLike = (e, post_id, user_id, count) => {
     onhandleLikeChange(e, post_id, user_id, count);
   };
-  // console.log(result);
   return (
     <>
       {data.map((post, index) => (
