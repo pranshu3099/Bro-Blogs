@@ -5,13 +5,14 @@ const useFetch = (url, info, method, headers, dependency = []) => {
   const [err, setError] = useState();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
+    let mounted = true;
     switch (method) {
       case "GET":
         setLoading(true);
         axios
           .get(url, { headers })
           .then((response) => {
-            if (response.status === 200) {
+            if (mounted && response.status === 200 && !data) {
               setData(response.data);
             }
           })
@@ -41,6 +42,9 @@ const useFetch = (url, info, method, headers, dependency = []) => {
       default:
         throw new Error("Method is Invalid");
     }
+    return () => {
+      mounted = false;
+    };
   }, [url, headers, info, method, ...dependency]);
   return { data, err, loading };
 };
