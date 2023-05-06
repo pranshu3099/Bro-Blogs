@@ -34,7 +34,7 @@ const Home = () => {
     if (data != undefined) {
       const posts = likearr[0];
       let islikedArray = [];
-      if (posts != null) {
+      if (posts !== undefined) {
         Object.keys(posts).forEach((key) => {
           if (posts[key].includes(data[0].user_id)) islikedArray.push(true);
           else {
@@ -103,19 +103,22 @@ const Home = () => {
     if (e.target.attributes.src.textContent === heart) {
       e.target.attributes.src.textContent = like;
       updatedCount = 0;
-      // setLiked(false);
+      setLikes(updatedCount);
       removeLikedFromLocalStorage(user_id, post_id);
     } else {
       e.target.attributes.src.textContent = heart;
       updatedCount = 1;
-      // setLiked(true);
+      setLikes(updatedCount);
       setLikedToLocalStorage(user_id, post_id);
     }
     if (count && !loading) {
       if (updatedCount) {
         updatedCount = count ? count : 0;
         updatedCount++;
-      } else updatedCount--;
+      } else {
+        updatedCount = count ? count : 0;
+        updatedCount--;
+      }
     }
     let postLikesData = {
       likes: updatedCount,
