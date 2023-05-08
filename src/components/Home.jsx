@@ -27,13 +27,15 @@ const Home = () => {
     headers,
     [likes]
   );
-  useLayoutEffect(() => {
-    let likearr = localStorage.getItem("posts")
-      ? JSON.parse(localStorage.getItem("posts"))
-      : [];
-    if (data != undefined) {
+  useEffect(() => {
+    if (data !== undefined) {
+      let likearr = localStorage.getItem("posts")
+        ? JSON.parse(localStorage.getItem("posts"))
+        : [];
+
       const posts = likearr[0];
       let islikedArray = [];
+
       if (posts !== undefined) {
         Object.keys(posts).forEach((key) => {
           if (posts[key].includes(data[0].user_id)) islikedArray.push(true);
@@ -42,10 +44,12 @@ const Home = () => {
           }
         });
       }
+
       if (data.length > islikedArray.length) {
         let length = data.length - islikedArray.length;
         islikedArray = [...islikedArray, ...Array(length).fill(false)];
       }
+
       setResult(islikedArray);
     }
   }, [data]);
