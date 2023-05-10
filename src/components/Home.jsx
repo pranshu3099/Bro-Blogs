@@ -36,7 +36,7 @@ const Home = () => {
       const posts = likearr[0];
       let islikedArray = [];
 
-      if (posts !== undefined) {
+      if (posts !== null) {
         Object.keys(posts).forEach((key) => {
           if (posts[key].includes(data[0].user_id)) islikedArray.push(true);
           else {
