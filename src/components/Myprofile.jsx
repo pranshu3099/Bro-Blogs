@@ -73,7 +73,7 @@ const Myprofile = () => {
           </a>
         </div>
         <article>
-          <div className="post-main-container">
+          <div className="user-post-main-container">
             {data && <BlogPosts data={data} />}
           </div>
         </article>
@@ -86,7 +86,7 @@ const BlogPosts = ({ data }) => {
   return (
     <>
       {data.map((post, index) => (
-        <div className="post-container" key={post.id}>
+        <div className="user-post-container" key={post.id}>
           <div className="date-name-container">
             <p>{post.name}</p>
             <p>15-april-2023</p>
