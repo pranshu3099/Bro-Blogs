@@ -369,3 +369,14 @@
   margin-bottom: 2px;
   margin-bottom: 5px;
 }
+
+/* ----------------- userposts---------------- */
+
+.user-post-main-container {
+  display: flex;
+}
+
+.user-post-container {
+  display: flex;
+  flex-direction: column;
+}
