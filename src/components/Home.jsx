@@ -141,6 +141,10 @@ const Home = () => {
       });
   };
 
+  const handleComment = (e) => {
+    console.log("comment");
+  };
+
   return (
     <article>
       <div className="post-main-container">
@@ -148,6 +152,7 @@ const Home = () => {
           <BlogPosts
             data={data}
             onhandleLikeChange={handleLike}
+            onhandleComment={handleComment}
             count={likes}
             result={result}
           />
@@ -157,16 +162,14 @@ const Home = () => {
   );
 };
 
-const BlogPosts = ({
-  data,
-  onhandleLikeChange,
-  count,
-  handleCount,
-  result,
-}) => {
+const BlogPosts = ({ data, onhandleLikeChange, onhandleComment, result }) => {
   const handleLike = (e, post_id, user_id, count) => {
     onhandleLikeChange(e, post_id, user_id, count);
   };
+  const handleComment = (e) => {
+    onhandleComment(e);
+  };
+
   return (
     <>
       {data.map((post, index) => (
@@ -200,7 +203,12 @@ const BlogPosts = ({
               />
             }
             <p>{post.count}</p>
-            <img src={comment} alt="" className="post-icons" />
+            <img
+              src={comment}
+              alt=""
+              className="post-icons"
+              onClick={(e) => handleComment(e)}
+            />
             <p>34</p>
           </div>
         </div>
