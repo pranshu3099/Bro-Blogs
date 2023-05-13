@@ -6,6 +6,7 @@ import useFetch from "./UseFetch";
 import axios from "axios";
 import { useMemo } from "react";
 import { useAuthContext } from "../context/Provider";
+import Comment from "./modal/Posts";
 
 const Home = () => {
   const getBearerToken = () => localStorage.getItem("Bearer");
@@ -27,147 +28,33 @@ const Home = () => {
     headers,
     [likes]
   );
-  useEffect(() => {
-    if (data !== undefined) {
-      let likearr = localStorage.getItem("posts")
-        ? JSON.parse(localStorage.getItem("posts"))
-        : [];
 
-      const posts = likearr[0];
-      let islikedArray = [];
-
-      if (posts !== null) {
-        Object.keys(posts).forEach((key) => {
-          if (posts[key].includes(data[0].user_id)) islikedArray.push(true);
-          else {
-            islikedArray.push(false);
-          }
-        });
-      }
-
-      if (data.length > islikedArray.length) {
-        let length = data.length - islikedArray.length;
-        islikedArray = [...islikedArray, ...Array(length).fill(false)];
-      }
-
-      setResult(islikedArray);
-    }
-  }, [data]);
-  function setLikedToLocalStorage(user_id, post_id) {
-    let likearr = localStorage.getItem("posts")
-      ? JSON.parse(localStorage.getItem("posts"))
-      : [];
-    if (likearr.length) {
-      let updatedArr = likearr.map((posts) => {
-        if (posts.hasOwnProperty(post_id)) {
-          let arr = posts[post_id];
-          arr.push(user_id);
-          return {
-            ...posts,
-            [post_id]: arr,
-          };
-        } else {
-          posts = { ...posts, [post_id]: [user_id] };
-        }
-        return posts;
-      });
-      likearr = updatedArr;
-    } else {
-      let newPost = {
-        [post_id]: [user_id],
-      };
-      likearr.push(newPost);
-    }
-    localStorage.setItem("posts", JSON.stringify(likearr));
-  }
-
-  function removeLikedFromLocalStorage(user_id, post_id) {
-    let likearr = localStorage.getItem("posts")
-      ? JSON.parse(localStorage.getItem("posts"))
-      : [];
-
-    if (!likearr.length) return false;
-    let updatedArr = likearr.map((posts) => {
-      if (posts.hasOwnProperty(post_id)) {
-        let arr = posts[post_id];
-        let newArr = arr.filter((id) => id !== user_id);
-        return {
-          ...posts,
-          [post_id]: newArr,
-        };
-      }
-      return posts;
-    });
-    localStorage.setItem("posts", JSON.stringify(updatedArr));
-  }
-
-  const handleLike = (e, post_id, user_id, count) => {
-    let updatedCount = 0;
-
-    if (e.target.attributes.src.textContent === heart) {
-      e.target.attributes.src.textContent = like;
-      updatedCount = 0;
-      setLikes(updatedCount);
-      removeLikedFromLocalStorage(user_id, post_id);
-    } else {
-      e.target.attributes.src.textContent = heart;
-      updatedCount = 1;
-      setLikes(updatedCount);
-      setLikedToLocalStorage(user_id, post_id);
-    }
-    if (count && !loading) {
-      if (updatedCount) {
-        updatedCount = count ? count : 0;
-        updatedCount++;
-      } else {
-        updatedCount = count ? count : 0;
-        updatedCount--;
-      }
-    }
-    let postLikesData = {
-      likes: updatedCount,
-      post_id: post_id,
-      user_id: user_id,
-    };
+  const handleBlog = (e, post_id) => {
+    console.log(post_id);
     axios
-      .post("http://127.0.0.1:8000/api/likeposts/likes", postLikesData, {
+      .get(`http://127.0.0.1:8000/api/posts/getsinglepost/${post_id}`, {
         headers,
       })
       .then((res) => {
-        setLikes(updatedCount);
+        console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  const handleComment = (e) => {
-    console.log("comment");
-  };
-
   return (
     <article>
       <div className="post-main-container">
-        {data && (
-          <BlogPosts
-            data={data}
-            onhandleLikeChange={handleLike}
-            onhandleComment={handleComment}
-            count={likes}
-            result={result}
-          />
-        )}
+        {data && <BlogPosts data={data} onHandleBlog={handleBlog} />}
       </div>
     </article>
   );
 };
 
-const BlogPosts = ({ data, onhandleLikeChange, onhandleComment, result }) => {
-  const handleLike = (e, post_id, user_id, count) => {
-    onhandleLikeChange(e, post_id, user_id, count);
-  };
-  const handleComment = (e) => {
-    onhandleComment(e);
+const BlogPosts = ({ data, onHandleBlog }) => {
+  const handleBlog = (e, post_id) => {
+    onHandleBlog(e, post_id);
   };
 
   return (
@@ -179,37 +66,12 @@ const BlogPosts = ({ data, onhandleLikeChange, onhandleComment, result }) => {
             <p>15-april-2023</p>
           </div>
           <div className="post-title">
-            <h1>{post.title}</h1>
-          </div>
-          <div>
-            <p>{post.content}</p>
-          </div>
-          <div className="post-icons-container">
-            {
-              <img
-                src={
-                  result.length
-                    ? result[index] === false
-                      ? like
-                      : heart
-                    : like
-                }
-                alt=""
-                className="post-icons"
-                onClick={(e) =>
-                  handleLike(e, post.post_id, post.user_id, post.count)
-                }
-                id="likes"
-              />
-            }
-            <p>{post.count}</p>
-            <img
-              src={comment}
-              alt=""
-              className="post-icons"
-              onClick={(e) => handleComment(e)}
-            />
-            <p>34</p>
+            <h1
+              onClick={(e) => handleBlog(e, post.post_id)}
+              style={{ cursor: "pointer" }}
+            >
+              {post.title}
+            </h1>
           </div>
         </div>
       ))}
