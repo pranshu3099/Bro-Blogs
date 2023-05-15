@@ -6,14 +6,13 @@ import useFetch from "./UseFetch";
 import axios from "axios";
 import { useMemo } from "react";
 import { useAuthContext } from "../context/Provider";
-import Comment from "./modal/Posts";
-
+import { useNavigate } from "react-router-dom";
 const Home = () => {
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
-  const { responseData } = useAuthContext();
   const [likes, setLikes] = useState(0);
-  const [result, setResult] = useState([]);
+  const [userpost, setUserPost] = useState([]);
+  const navigate = useNavigate();
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${bearer}`,
@@ -26,29 +25,35 @@ const Home = () => {
     "",
     "GET",
     headers,
-    [likes]
+    [userpost]
   );
-
+  useEffect(() => {
+    if (userpost.length) {
+      navigate("/posts", { state: { postdata: userpost } });
+    }
+  }, [userpost, navigate]);
   const handleBlog = (e, post_id) => {
-    console.log(post_id);
     axios
       .get(`http://127.0.0.1:8000/api/posts/getsinglepost/${post_id}`, {
         headers,
       })
       .then((res) => {
-        console.log(res.data);
+        setUserPost(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
   };
-
   return (
-    <article>
-      <div className="post-main-container">
-        {data && <BlogPosts data={data} onHandleBlog={handleBlog} />}
-      </div>
-    </article>
+    <>
+      <article>
+        {!userpost.length && (
+          <div className="post-main-container">
+            {data && <BlogPosts data={data} onHandleBlog={handleBlog} />}
+          </div>
+        )}
+      </article>
+    </>
   );
 };
 
