@@ -8,6 +8,7 @@ import Signup from "./auth/Signup";
 import SharedLayout from "./components/SharedLayout";
 import { AuthProvider } from "./context/Provider";
 import Myprofile from "./components/Myprofile";
+import Posts from "./components/modal/Posts";
 function App() {
   return (
     <div className="App">
@@ -21,6 +22,7 @@ function App() {
               <Route path="/Login" element={<Login />} />
               <Route path="/Signup" element={<Signup />} />
               <Route path="/myprofile" element={<Myprofile />} />
+              <Route path="/posts" element={<Posts />} />
             </Route>
           </Routes>
         </BrowserRouter>
