@@ -6,13 +6,17 @@ import useFetch from "../UseFetch";
 import axios from "axios";
 import { useMemo } from "react";
 import { useAuthContext } from "../../context/Provider";
-
+import { useLocation } from "react-router-dom";
+import { Button, Input, Textarea } from "@chakra-ui/react";
 const Posts = () => {
+  const location = useLocation();
+  const { postdata } = location.state || {};
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const { responseData } = useAuthContext();
   const [likes, setLikes] = useState(0);
   const [result, setResult] = useState([]);
+  const [sendComment, setSendComment] = useState(false);
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${bearer}`,
@@ -20,15 +24,8 @@ const Posts = () => {
     }),
     [bearer]
   );
-  const { data, err, loading } = useFetch(
-    "http://127.0.0.1:8000/api/posts/getposts",
-    "",
-    "GET",
-    headers,
-    [likes]
-  );
   useEffect(() => {
-    if (data !== undefined) {
+    if (postdata !== undefined) {
       let likearr = localStorage.getItem("posts")
         ? JSON.parse(localStorage.getItem("posts"))
         : [];
@@ -38,21 +35,21 @@ const Posts = () => {
 
       if (posts !== null) {
         Object.keys(posts).forEach((key) => {
-          if (posts[key].includes(data[0].user_id)) islikedArray.push(true);
+          if (posts[key].includes(postdata.user_id)) islikedArray.push(true);
           else {
             islikedArray.push(false);
           }
         });
       }
 
-      if (data.length > islikedArray.length) {
-        let length = data.length - islikedArray.length;
-        islikedArray = [...islikedArray, ...Array(length).fill(false)];
-      }
+      // if (data.length > islikedArray.length) {
+      //   let length = data.length - islikedArray.length;
+      //   islikedArray = [...islikedArray, ...Array(length).fill(false)];
+      // }
 
       setResult(islikedArray);
     }
-  }, [data]);
+  }, [postdata]);
   function setLikedToLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
@@ -115,7 +112,7 @@ const Posts = () => {
       setLikes(updatedCount);
       setLikedToLocalStorage(user_id, post_id);
     }
-    if (count && !loading) {
+    if (count) {
       if (updatedCount) {
         updatedCount = count ? count : 0;
         updatedCount++;
@@ -142,27 +139,62 @@ const Posts = () => {
   };
 
   const handleComment = () => {
-    console.log("hello");
+    if (sendComment) {
+      setSendComment(false);
+      document.getElementById("comment-list").style.left = "-100%";
+      document.getElementById("comment-list").style.width = "20%";
+    } else {
+      setSendComment(true);
+      document.getElementById("comment-list").style.left = "0";
+      document.getElementById("comment-list").style.width = "100%";
+    }
   };
 
   return (
     <article>
       <div className="post-main-container">
-        {data && (
+        {postdata ? (
           <BlogPosts
-            data={data}
+            posts={postdata}
             onhandleLikeChange={handleLike}
             onhandleComment={handleComment}
             count={likes}
             result={result}
           />
-        )}
+        ) : null}
+      </div>
+      <div className="comment-list-container">
+        <ul id="comment-list">
+          <div className="comment-container">
+            <Textarea placeholder="Comment" className="comment" />
+            <div className="comment-btn-container">
+              <Button
+                colorScheme="blue"
+                onClick={handleComment}
+                className="comment-btn"
+              >
+                comment
+              </Button>
+              <Button
+                colorScheme="blue"
+                onClick={handleComment}
+                className="comment-btn"
+              >
+                cancel
+              </Button>
+            </div>
+          </div>
+          <li>Home</li>
+          <li>About</li>
+          <li>Services</li>
+          <li>Content</li>
+        </ul>
       </div>
     </article>
   );
 };
 
-const BlogPosts = ({ data, onhandleLikeChange, onhandleComment, result }) => {
+const BlogPosts = ({ posts, onhandleLikeChange, onhandleComment, result }) => {
   const handleLike = (e, post_id, user_id, count) => {
     onhandleLikeChange(e, post_id, user_id, count);
   };
@@ -170,18 +202,21 @@ const BlogPosts = ({ data, onhandleLikeChange, onhandleComment, result }) => {
     onhandleComment(e, post_id);
   };
 
+  const dateTimeString = posts[0].created_at;
+  const dateTime = new Date(dateTimeString);
+  const date = dateTime.toLocaleDateString();
   return (
     <>
-      {data.map((post, index) => (
+      {posts.map((post, index) => (
         <div className="post-container" key={post.id}>
           <div className="date-name-container">
             <p>{post.name}</p>
-            <p>15-april-2023</p>
+            <p>{date}</p>
           </div>
           <div className="post-title">
             <h1>{post.title}</h1>
           </div>
-          <div>
+          <div className="post-content">
             <p>{post.content}</p>
           </div>
           <div className="post-icons-container">
