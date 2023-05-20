@@ -11,12 +11,15 @@ import { Button, Input, Textarea } from "@chakra-ui/react";
 const Posts = () => {
   const location = useLocation();
   const { postdata } = location.state || {};
+  console.log(postdata);
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const { responseData } = useAuthContext();
   const [likes, setLikes] = useState(0);
   const [result, setResult] = useState([]);
   const [sendComment, setSendComment] = useState(false);
+  const [Yourcomment, setYourComment] = useState("");
+  const [yourCommentList, setYourCommentList] = useState([]);
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${bearer}`,
@@ -50,6 +53,23 @@ const Posts = () => {
       setResult(islikedArray);
     }
   }, [postdata]);
+
+  useEffect(() => {
+    axios
+      .get(
+        `http://127.0.0.1:8000/api/comments/getcomments/${postdata[0].post_id}`,
+        {
+          headers,
+        }
+      )
+      .then((res) => {
+        console.log(res.data);
+        setYourCommentList(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   function setLikedToLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
@@ -138,7 +158,20 @@ const Posts = () => {
       });
   };
 
-  const handleComment = () => {
+  const handleSendComment = () => {
+    const comment = {
+      user_id: postdata[0].user_id,
+      post_id: postdata[0].post_id,
+      comment: Yourcomment,
+    };
+    setYourComment("");
+    axios
+      .post("http://127.0.0.1:8000/api/comments/create", comment, { headers })
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+  };
+
+  const handleComment = (e, post_id) => {
     if (sendComment) {
       setSendComment(false);
       document.getElementById("comment-list").style.left = "-100%";
@@ -166,11 +199,18 @@ const Posts = () => {
       <div className="comment-list-container">
         <ul id="comment-list">
           <div className="comment-container">
-            <Textarea placeholder="Comment" className="comment" />
+            <Textarea
+              placeholder="Comment"
+              className="comment"
+              value={Yourcomment}
+              onChange={(e) => {
+                setYourComment(e.target.value);
+              }}
+            />
             <div className="comment-btn-container">
               <Button
                 colorScheme="blue"
-                onClick={handleComment}
+                onClick={handleSendComment}
                 className="comment-btn"
               >
                 comment
@@ -184,13 +224,29 @@ const Posts = () => {
               </Button>
             </div>
           </div>
-          <li>Home</li>
-          <li>About</li>
-          <li>Services</li>
-          <li>Content</li>
+          <div className="main-comment-list">
+            {yourCommentList.length ? (
+              <CommentList comments={yourCommentList} />
+            ) : null}
+          </div>
         </ul>
       </div>
     </article>
+  );
+};
+
+const CommentList = ({ comments }) => {
+  return (
+    <>
+      {comments.map((comment, index) => {
+        return (
+          <li key={index}>
+            <p className="name">{comment.name}</p>
+            <p className="main-comment">{comment.comment}</p>
+          </li>
+        );
+      })}
+    </>
   );
 };
 
