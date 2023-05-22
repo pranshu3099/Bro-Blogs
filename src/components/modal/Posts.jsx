@@ -33,7 +33,6 @@ const Posts = () => {
         : [];
 
       const posts = likearr[0];
-      console.log(posts);
       let islikedArray = [];
 
       if (posts !== undefined) {
