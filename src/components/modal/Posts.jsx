@@ -11,7 +11,6 @@ import { Button, Input, Textarea } from "@chakra-ui/react";
 const Posts = () => {
   const location = useLocation();
   const { postdata } = location.state || {};
-  console.log(postdata);
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const { responseData } = useAuthContext();
@@ -34,9 +33,10 @@ const Posts = () => {
         : [];
 
       const posts = likearr[0];
+      console.log(posts);
       let islikedArray = [];
 
-      if (posts !== null) {
+      if (posts !== undefined) {
         Object.keys(posts).forEach((key) => {
           if (posts[key].includes(postdata.user_id)) islikedArray.push(true);
           else {
@@ -158,17 +158,30 @@ const Posts = () => {
       });
   };
 
+  function checkForSpaces() {
+    let trimmedText = Yourcomment;
+    let pattern = /^\s*$/;
+    return pattern.test(trimmedText);
+  }
+
   const handleSendComment = () => {
-    const comment = {
-      user_id: postdata[0].user_id,
-      post_id: postdata[0].post_id,
-      comment: Yourcomment,
-    };
-    setYourComment("");
-    axios
-      .post("http://127.0.0.1:8000/api/comments/create", comment, { headers })
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+    let comment = {};
+    if (Yourcomment === "" || checkForSpaces()) {
+      alert("comment is required");
+    } else {
+      comment = {
+        user_id: postdata[0].user_id,
+        post_id: postdata[0].post_id,
+        comment: Yourcomment,
+      };
+      setYourComment("");
+      axios
+        .post("http://127.0.0.1:8000/api/comments/create", comment, { headers })
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+    }
+    comment["name"] = responseData?.data?.original?.user?.name;
+    setYourCommentList([...yourCommentList, comment]);
   };
 
   const handleComment = (e, post_id) => {
