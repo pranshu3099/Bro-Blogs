@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import useFetch from "./UseFetch";
 import { useAuthContext } from "../context/Provider";
@@ -23,14 +23,17 @@ const CreateBlog = () => {
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const [data, setData] = useState("");
-  const headers = {
-    Authorization: `Bearer ${bearer}`,
-    "Content-Type": "application/json",
-  };
+  const headers = useMemo(
+    () => ({
+      Authorization: `${bearer}`,
+      "Content-Type": "application/json",
+    }),
+    [bearer]
+  );
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/categories/getcategories", { headers })
+      .get("http://127.0.0.1:3000/getcategories", { headers })
       .then((response) => {
         if (response.status === 200) {
           setData(response.data);
@@ -76,14 +79,14 @@ const CreateBlog = () => {
     dispatch({ title: "", yourblog: "", type: "resolved" });
     let randomNum = Math.floor(Math.random() * 9000) + 1000;
     let data = {
-      title: blog.title,
-      content: blog.yourblog,
-      user_id: responseData.data.original.user.id,
-      category_id: selectedCategory,
-      post_id: randomNum,
+      title: blog?.title,
+      content: blog?.yourblog,
+      user_id: Number(responseData?.data?.user?.id),
+      category_id: Number(selectedCategory),
+      posts_id: Number(randomNum),
     };
     axios
-      .post("http://127.0.0.1:8000/api/posts/createposts", data, { headers })
+      .post("http://127.0.0.1:3000/createposts", data, { headers })
       .then((response) => {
         if (response.status === 200) {
           setSubmit(true);
@@ -183,6 +186,7 @@ const CreateBlog = () => {
         </>
       }
       {submit && <Navigate to="/" />}
+      {headers.Authorization === String(null) && <Navigate to="/Login" />}
     </div>
   );
 };
@@ -194,11 +198,12 @@ const SelectCategories = ({ category, onChange }) => {
     },
     [onChange]
   );
+  const category_data = category.categories;
   return (
     <>
       <select onChange={handleChange}>
         <option value="">Select a category</option>
-        {category.map((cat) => {
+        {category_data.map((cat) => {
           return (
             <option key={cat.slug} value={cat.slug}>
               {cat.category_name}
