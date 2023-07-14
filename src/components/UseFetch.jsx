@@ -17,7 +17,7 @@ const useFetch = (url, info, method, headers, dependency = []) => {
             }
           })
           .catch((err) => {
-            setError(err.response.data.error);
+            // setError(err.response.data.error);
           })
           .finally(() => {
             setLoading(false);
@@ -33,7 +33,7 @@ const useFetch = (url, info, method, headers, dependency = []) => {
             }
           })
           .catch((err) => {
-            setError(err.response.data.error);
+            // setError(err.response.data.error);
           })
           .finally(() => {
             setLoading(false);
