@@ -1,9 +1,9 @@
 import { Input, Button } from "@chakra-ui/react";
-import user from "/media/pranshu/My Passport/my-blog/src/icons/user.png";
-import email from "/media/pranshu/My Passport/my-blog/src/icons/email.png";
-import phone from "/media/pranshu/My Passport/my-blog/src/icons/phone.png";
-import eye from "/media/pranshu/My Passport/my-blog/src/icons/eye.png";
-import hidden from "/media/pranshu/My Passport/my-blog/src/icons/hidden.png";
+import user from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/user.png";
+import email from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/email.png";
+import phone from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/phone.png";
+import eye from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/eye.png";
+import hidden from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/hidden.png";
 import { useReducer, useEffect, useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
@@ -155,7 +155,7 @@ const Signup = () => {
 
   function fetchdata(info) {
     axios
-      .post("http://127.0.0.1:8000/api/auth/register", info, { headers })
+      .post("http://127.0.0.1:3000/register", info, { headers })
       .then((response) => {
         if (response.status === 200) {
           setAuth(true);
