@@ -1,13 +1,13 @@
-import like from "/media/pranshu/My Passport/my-blog/src/icons/like.png";
-import comment from "/media/pranshu/My Passport/my-blog/src/icons/comment.png";
-import heart from "/media/pranshu/My Passport/my-blog/src/icons/heart.png";
-import { useCallback, useState, useEffect, useLayoutEffect } from "react";
-import useFetch from "../UseFetch";
+import like from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/like.png";
+import comment from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/comment.png";
+import heart from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/heart.png";
+import { useState, useEffect, useLayoutEffect } from "react";
 import axios from "axios";
 import { useMemo } from "react";
 import { useAuthContext } from "../../context/Provider";
 import { useLocation } from "react-router-dom";
 import { Button, Input, Textarea } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 const Posts = () => {
   const location = useLocation();
   const { postdata } = location.state || {};
@@ -19,31 +19,33 @@ const Posts = () => {
   const [sendComment, setSendComment] = useState(false);
   const [Yourcomment, setYourComment] = useState("");
   const [yourCommentList, setYourCommentList] = useState([]);
+  const navigate = useNavigate();
   const headers = useMemo(
     () => ({
-      Authorization: `Bearer ${bearer}`,
+      Authorization: `${bearer}`,
       "Content-Type": "application/json",
     }),
     [bearer]
   );
+
   useEffect(() => {
-    if (postdata !== undefined) {
+    if (responseData !== undefined) {
       let likearr = localStorage.getItem("posts")
         ? JSON.parse(localStorage.getItem("posts"))
         : [];
-
       const posts = likearr[0];
-      let islikedArray = [];
 
+      let islikedArray = [];
       if (posts !== undefined) {
         Object.keys(posts).forEach((key) => {
-          if (posts[key].includes(postdata.user_id)) islikedArray.push(true);
-          else {
+          if (posts.hasOwnProperty(postdata[0]?.posts?.posts_id)) {
+            if (posts[key].includes(responseData?.data?.user?.id))
+              islikedArray.push(true);
+          } else {
             islikedArray.push(false);
           }
         });
       }
-
       // if (data.length > islikedArray.length) {
       //   let length = data.length - islikedArray.length;
       //   islikedArray = [...islikedArray, ...Array(length).fill(false)];
@@ -56,14 +58,13 @@ const Posts = () => {
   useEffect(() => {
     axios
       .get(
-        `http://127.0.0.1:8000/api/comments/getcomments/${postdata[0].post_id}`,
+        `http://127.0.0.1:3000/getcomments/${postdata[0]?.posts?.posts_id}`,
         {
           headers,
         }
       )
       .then((res) => {
-        console.log(res.data);
-        setYourCommentList(res.data);
+        setYourCommentList(res.data.comments);
       })
       .catch((err) => {
         console.log(err);
@@ -74,6 +75,7 @@ const Posts = () => {
       ? JSON.parse(localStorage.getItem("posts"))
       : [];
     if (likearr.length) {
+      console.log("setLikedToLocalStorage");
       let updatedArr = likearr.map((posts) => {
         if (posts.hasOwnProperty(post_id)) {
           let arr = posts[post_id];
@@ -117,44 +119,41 @@ const Posts = () => {
     localStorage.setItem("posts", JSON.stringify(updatedArr));
   }
 
-  const handleLike = (e, post_id, user_id, count) => {
-    let updatedCount = 0;
-
-    if (e.target.attributes.src.textContent === heart) {
-      e.target.attributes.src.textContent = like;
-      updatedCount = 0;
-      setLikes(updatedCount);
-      removeLikedFromLocalStorage(user_id, post_id);
-    } else {
-      e.target.attributes.src.textContent = heart;
-      updatedCount = 1;
-      setLikes(updatedCount);
-      setLikedToLocalStorage(user_id, post_id);
-    }
-    if (count) {
-      if (updatedCount) {
-        updatedCount = count ? count : 0;
-        updatedCount++;
+  const handleLike = (e, post_id, user_id, likes_count) => {
+    if (headers.Authorization !== String(null)) {
+      if (e.target.attributes.src.textContent === heart) {
+        e.target.attributes.src.textContent = like;
+        removeLikedFromLocalStorage(user_id, post_id);
+        axios
+          .post(
+            `http://127.0.0.1:3000/removeLikes/${post_id}/users/${user_id}`,
+            {
+              headers,
+            }
+          )
+          .then((res) => {
+            setLikes(res?.data?.likes);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       } else {
-        updatedCount = count ? count : 0;
-        updatedCount--;
+        e.target.attributes.src.textContent = heart;
+        setLikedToLocalStorage(user_id, post_id);
+        axios
+          .post(`http://127.0.0.1:3000/addlikes/${post_id}/users/${user_id}`, {
+            headers,
+          })
+          .then((res) => {
+            setLikes(res?.data?.likes);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
+    } else {
+      navigate("/Login");
     }
-    let postLikesData = {
-      likes: updatedCount,
-      post_id: post_id,
-      user_id: user_id,
-    };
-    axios
-      .post("http://127.0.0.1:8000/api/likeposts/likes", postLikesData, {
-        headers,
-      })
-      .then((res) => {
-        setLikes(updatedCount);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   };
 
   function checkForSpaces() {
@@ -164,23 +163,28 @@ const Posts = () => {
   }
 
   const handleSendComment = () => {
-    let comment = {};
-    if (Yourcomment === "" || checkForSpaces()) {
-      alert("comment is required");
+    if (headers.Authorization !== String(null)) {
+      let comment = {};
+      if (Yourcomment === "" || checkForSpaces()) {
+        alert("comment is required");
+      } else {
+        comment = {
+          user_id: responseData?.data?.user?.id,
+          posts_id: postdata[0].posts?.posts_id,
+          comment: Yourcomment,
+        };
+        setYourComment("");
+        axios
+          .post("http://127.0.0.1:3000/comment/", comment, { headers })
+          .then((res) => console.log(res))
+          .catch((err) => console.log(err));
+      }
+      comment["name"] = responseData?.data?.user?.name;
+      console.log(comment);
+      setYourCommentList([...yourCommentList, comment]);
     } else {
-      comment = {
-        user_id: postdata[0].user_id,
-        post_id: postdata[0].post_id,
-        comment: Yourcomment,
-      };
-      setYourComment("");
-      axios
-        .post("http://127.0.0.1:8000/api/comments/create", comment, { headers })
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err));
+      navigate("/Login");
     }
-    comment["name"] = responseData?.data?.original?.user?.name;
-    setYourCommentList([...yourCommentList, comment]);
   };
 
   const handleComment = (e, post_id) => {
@@ -203,8 +207,11 @@ const Posts = () => {
             posts={postdata}
             onhandleLikeChange={handleLike}
             onhandleComment={handleComment}
+            commentcount={yourCommentList}
             count={likes}
             result={result}
+            responseData={responseData}
+            likes={likes}
           />
         ) : null}
       </div>
@@ -238,7 +245,7 @@ const Posts = () => {
           </div>
           <div className="main-comment-list">
             {yourCommentList.length ? (
-              <CommentList comments={yourCommentList} />
+              <CommentList usercomments={yourCommentList} />
             ) : null}
           </div>
         </ul>
@@ -247,14 +254,16 @@ const Posts = () => {
   );
 };
 
-const CommentList = ({ comments }) => {
+const CommentList = ({ usercomments }) => {
   return (
     <>
-      {comments.map((comment, index) => {
+      {usercomments.map((comment, index) => {
         return (
           <li key={index}>
-            <p className="name">{comment.name}</p>
-            <p className="main-comment">{comment.comment}</p>
+            <p className="name">
+              {comment?.name ? comment.name : comment?.user?.name}
+            </p>
+            <p className="main-comment">{comment?.comment}</p>
           </li>
         );
       })}
@@ -262,30 +271,34 @@ const CommentList = ({ comments }) => {
   );
 };
 
-const BlogPosts = ({ posts, onhandleLikeChange, onhandleComment, result }) => {
-  const handleLike = (e, post_id, user_id, count) => {
-    onhandleLikeChange(e, post_id, user_id, count);
+const BlogPosts = ({
+  posts,
+  onhandleLikeChange,
+  onhandleComment,
+  result,
+  responseData,
+  likes,
+  commentcount,
+}) => {
+  const handleLike = (e, post_id, user_id, likes_count) => {
+    onhandleLikeChange(e, post_id, user_id, likes_count);
   };
   const handleComment = (e, post_id) => {
     onhandleComment(e, post_id);
   };
-
-  const dateTimeString = posts[0].created_at;
-  const dateTime = new Date(dateTimeString);
-  const date = dateTime.toLocaleDateString();
   return (
     <>
       {posts.map((post, index) => (
-        <div className="post-container" key={post.id}>
+        <div className="post-container" key={IDBIndex}>
           <div className="date-name-container">
-            <p>{post.name}</p>
-            <p>{date}</p>
+            <p>{post?.posts?.user?.name}</p>
+            <p>{post?.posts?.created_at.substring(0, 9)}</p>
           </div>
           <div className="post-title">
-            <h1>{post.title}</h1>
+            <h1>{post?.posts?.title}</h1>
           </div>
           <div className="post-content">
-            <p>{post.content}</p>
+            <p>{post.posts.content}</p>
           </div>
           <div className="post-icons-container">
             {
@@ -300,19 +313,24 @@ const BlogPosts = ({ posts, onhandleLikeChange, onhandleComment, result }) => {
                 alt=""
                 className="post-icons"
                 onClick={(e) =>
-                  handleLike(e, post.post_id, post.user_id, post.count)
+                  handleLike(
+                    e,
+                    post?.posts?.posts_id,
+                    responseData?.data?.user?.id,
+                    post?.posts?.likes_count
+                  )
                 }
                 id="likes"
               />
             }
-            <p>{post.count}</p>
+            <p>{likes ? likes : post?.posts?.likes_count}</p>
             <img
               src={comment}
               alt=""
               className="post-icons"
-              onClick={(e) => handleComment(e, post.post_id)}
+              onClick={(e) => handleComment(e, post?.posts?.posts_id)}
             />
-            <p>34</p>
+            <p>{commentcount.length}</p>
           </div>
         </div>
       ))}
