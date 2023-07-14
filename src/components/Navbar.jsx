@@ -16,12 +16,10 @@ const Navbar = () => {
               <Link to="/" className="icons">
                 Home
               </Link>
-              <Link to="/about" className="icons">
-                About
-              </Link>
               <Link to="/create" className="icons">
                 Write Blog
               </Link>
+
               <Profile />
               <Search />
             </div>
@@ -31,6 +29,12 @@ const Navbar = () => {
           {!auth && (
             <>
               {" "}
+              <Link to="/" className="icons">
+                Home
+              </Link>
+              <Link to="/create" className="icons">
+                Write Blog
+              </Link>
               <Link to="/login" className="icons">
                 Login
               </Link>
