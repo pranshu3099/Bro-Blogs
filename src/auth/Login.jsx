@@ -1,13 +1,18 @@
-import blog from "/media/pranshu/My Passport/my-blog/src/images/blog.jpg";
-import email from "/media/pranshu/My Passport/my-blog/src/icons/email.png";
-import eye from "/media/pranshu/My Passport/my-blog/src/icons/eye.png";
-import hidden from "/media/pranshu/My Passport/my-blog/src/icons/hidden.png";
+import blog from "/home/pranshu/Bro Blogs/Bro-Blogs/src/images/blog.jpg";
+import email from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/email.png";
+import eye from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/eye.png";
+import hidden from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/hidden.png";
 import { Input, Button } from "@chakra-ui/react";
 import React from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { useAuthContext } from "../context/Provider";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
+  const getBearerToken = () => localStorage.getItem("Bearer");
+  const [bearer] = useState(getBearerToken);
+  const navigate = useNavigate();
   let [data, setData] = React.useState({
     email: "",
     password: "",
@@ -18,6 +23,13 @@ const Login = () => {
     password: "",
   });
   let { auth, setAuth, setRes, responseData } = useAuthContext();
+  const headers = useMemo(
+    () => ({
+      Authorization: ` ${bearer}`,
+      "Content-Type": "application/json",
+    }),
+    [bearer]
+  );
   let changeIcon = (e, icon) => {
     if (icon === eye) {
       e.target.attributes.src.textContent = hidden;
@@ -55,20 +67,18 @@ const Login = () => {
 
   function fetchdata() {
     axios
-      .post("http://127.0.0.1:8000/api/auth/login", data)
+      .post("http://127.0.0.1:3000/login", data)
       .then((response) => {
         if (response.status === 200) {
           setAuth(true);
           setRes(response);
-          localStorage.setItem(
-            "Bearer",
-            response.data.original.authorisation.access_token
-          );
+          localStorage.setItem("Bearer", response.data.Authorization);
+          navigate("/");
         }
       })
       .catch((err) => {
         console.log(err);
-        setError(err.response.data.error);
+        // setError(err.response.data.error);
       });
   }
 
@@ -105,8 +115,8 @@ const Login = () => {
               }}
             />
             <img src={email} alt="" className="login-icons" />
-            {requiredFields.email && <div>The email field is required</div>}
-            {error.email && <div>{error.email}</div>}
+            {requiredFields?.email && <div>The email field is required</div>}
+            {error?.email && <div>{error?.email}</div>}
             <Input
               type="Password"
               id="password"
@@ -138,7 +148,6 @@ const Login = () => {
           </div>
         </div>
       </form>
-      {auth && <Navigate to="/" />}
     </>
   );
 };
