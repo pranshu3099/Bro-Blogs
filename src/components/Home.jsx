@@ -1,6 +1,6 @@
-import like from "/media/pranshu/My Passport/my-blog/src/icons/like.png";
-import comment from "/media/pranshu/My Passport/my-blog/src/icons/comment.png";
-import heart from "/media/pranshu/My Passport/my-blog/src/icons/heart.png";
+import like from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/like.png";
+import comment from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/comment.png";
+import heart from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/heart.png";
 import { useCallback, useState, useEffect, useLayoutEffect } from "react";
 import useFetch from "./UseFetch";
 import axios from "axios";
@@ -21,7 +21,7 @@ const Home = () => {
     [bearer]
   );
   const { data, err, loading } = useFetch(
-    "http://127.0.0.1:8000/api/posts/getposts",
+    "http://127.0.0.1:3000/getposts",
     "",
     "GET",
     headers,
@@ -34,7 +34,7 @@ const Home = () => {
   }, [userpost, navigate]);
   const handleBlog = (e, post_id) => {
     axios
-      .get(`http://127.0.0.1:8000/api/posts/getsinglepost/${post_id}`, {
+      .get(`http://127.0.0.1:3000/getsinglepost/${post_id}`, {
         headers,
       })
       .then((res) => {
@@ -46,11 +46,13 @@ const Home = () => {
   };
   return (
     <>
-      <article>
+      <article style={{ marginTop: "35px" }}>
         {!userpost.length && (
-          <div className="post-main-container">
-            {data && <BlogPosts data={data} onHandleBlog={handleBlog} />}
-          </div>
+          <>
+            <div className="post-main-container">
+              {data && <BlogPosts data={data} onHandleBlog={handleBlog} />}
+            </div>
+          </>
         )}
       </article>
     </>
@@ -62,22 +64,25 @@ const BlogPosts = ({ data, onHandleBlog }) => {
     onHandleBlog(e, post_id);
   };
 
+  const posts_data = data[0]?.posts;
   return (
     <>
-      {data.map((post, index) => (
+      {posts_data.map((post, index) => (
         <div className="post-container" key={post.id}>
           <div className="date-name-container">
-            <p>{post.name}</p>
-            <p>15-april-2023</p>
+            <p>{post.created_at.substring(0, 9)}</p>
+            <p>{post.user.name}</p>
           </div>
           <div className="post-title">
             <h1
-              onClick={(e) => handleBlog(e, post.post_id)}
+              onClick={(e) => handleBlog(e, post.posts_id)}
               style={{ cursor: "pointer" }}
             >
               {post.title}
             </h1>
+            <p>{post.content}</p>
           </div>
+          <hr />
         </div>
       ))}
     </>
