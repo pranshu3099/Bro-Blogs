@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import user from "/media/pranshu/My Passport/my-blog/src/icons/user.png";
-import logout from "/media/pranshu/My Passport/my-blog/src/icons/logout.png";
+import user from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/user.png";
+import logout from "/home/pranshu/Bro Blogs/Bro-Blogs/src/icons/logout.png";
 import { useAuthContext } from "../context/Provider";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 const Profile = () => {
   const [show, setShow] = useState(false);
   const { isloggedout, setIsLoggedOut } = useAuthContext();
+  const getBearerToken = () => localStorage.getItem("Bearer");
+  const [bearer] = useState(getBearerToken);
+  const navigate = useNavigate();
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${bearer}`,
+      "Content-Type": "application/json",
+    }),
+    [bearer]
+  );
   const handleProfileClick = () => {
     const dropdown = document.querySelector(".profile-icon");
     if (show) {
@@ -18,25 +30,10 @@ const Profile = () => {
       setShow(true);
     }
   };
-  const fetch = () => {
-    const bearer_token = localStorage.getItem("bearer");
-    const header = {
-      Authorization: bearer_token,
-    };
-    axios
-      .post("http://127.0.0.1:8000/api/auth/logout", {
-        header: header,
-      })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
 
   const handleLogout = () => {
-    fetch();
+    localStorage.removeItem("Bearer");
+    navigate("/Login");
   };
   return (
     <>
@@ -44,12 +41,12 @@ const Profile = () => {
         <div style={{ cursor: "pointer" }}>Profile</div>
         <div className="profile-icon" id="profile-icon-container">
           <div className="profile-icon-sub-container">
-            <div onClick={handleLogout}>Logout</div>
-            <img src={user} alt="" />
-          </div>
-          <div className="profile-icon-sub-container">
-            <Link to="/myprofile">My profile</Link>
+            <div onClick={handleLogout} style={{ cursor: "pointer" }}>
+              Logout
+            </div>
             <img src={logout} alt="" />
+            <Link to="/myprofile">My profile</Link>
+            <img src={user} alt="" />
           </div>
         </div>
       </div>
