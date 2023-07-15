@@ -294,12 +294,6 @@ const BlogPosts = ({
             <p>{post?.posts?.user?.name}</p>
             <p>{post?.posts?.created_at.substring(0, 9)}</p>
           </div>
-          <div className="post-title">
-            <h1>{post?.posts?.title}</h1>
-          </div>
-          <div className="post-content">
-            <p>{post.posts.content}</p>
-          </div>
           <div className="post-icons-container">
             {
               <img
@@ -331,6 +325,15 @@ const BlogPosts = ({
               onClick={(e) => handleComment(e, post?.posts?.posts_id)}
             />
             <p>{commentcount.length}</p>
+          </div>
+          <div className="post-title">
+            <h1>{post?.posts?.title}</h1>
+          </div>
+          <div className="post-image">
+            <img src={post?.posts?.image} alt="" />
+          </div>
+          <div className="post-content">
+            <p>{post.posts.content}</p>
           </div>
         </div>
       ))}
