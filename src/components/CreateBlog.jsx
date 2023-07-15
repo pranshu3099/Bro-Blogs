@@ -4,6 +4,7 @@ import useFetch from "./UseFetch";
 import { useAuthContext } from "../context/Provider";
 import axios from "axios";
 import Home from "./Home";
+import FileResizer from "react-image-file-resizer";
 import {
   Modal,
   ModalOverlay,
@@ -23,6 +24,8 @@ const CreateBlog = () => {
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const [data, setData] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [resizedImage, setResizedImage] = useState(null);
   const headers = useMemo(
     () => ({
       Authorization: `${bearer}`,
@@ -84,7 +87,9 @@ const CreateBlog = () => {
       user_id: Number(responseData?.data?.user?.id),
       category_id: Number(selectedCategory),
       posts_id: Number(randomNum),
+      image: resizedImage,
     };
+
     axios
       .post("http://127.0.0.1:3000/createposts", data, { headers })
       .then((response) => {
@@ -99,6 +104,24 @@ const CreateBlog = () => {
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);
   };
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    FileResizer.imageFileResizer(
+      file,
+      300,
+      300,
+      "JPEG",
+      80,
+      0,
+      (uri) => {
+        setResizedImage(uri);
+      },
+      "base64"
+    );
+  };
+
   return (
     <div className="blog-main-container">
       {
@@ -124,6 +147,13 @@ const CreateBlog = () => {
                   }
                 />
               </label>
+            </div>
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileInputChange}
+              />
             </div>
             <div>
               <Textarea
