@@ -36,20 +36,26 @@ const Posts = () => {
       const posts = likearr[0];
 
       let islikedArray = [];
+      console.log(
+        posts[postdata[0]?.posts?.posts_id].includes(
+          responseData?.data?.user?.id
+        )
+      );
       if (posts !== undefined) {
-        Object.keys(posts).forEach((key) => {
-          if (posts.hasOwnProperty(postdata[0]?.posts?.posts_id)) {
-            if (posts[key].includes(responseData?.data?.user?.id))
-              islikedArray.push(true);
+        if (posts.hasOwnProperty(postdata[0]?.posts?.posts_id)) {
+          if (
+            posts[postdata[0]?.posts?.posts_id].includes(
+              responseData?.data?.user?.id
+            )
+          ) {
+            console.log("first");
+            islikedArray.push(true);
           } else {
+            console.log("else");
             islikedArray.push(false);
           }
-        });
+        }
       }
-      // if (data.length > islikedArray.length) {
-      //   let length = data.length - islikedArray.length;
-      //   islikedArray = [...islikedArray, ...Array(length).fill(false)];
-      // }
 
       setResult(islikedArray);
     }
@@ -75,7 +81,6 @@ const Posts = () => {
       ? JSON.parse(localStorage.getItem("posts"))
       : [];
     if (likearr.length) {
-      console.log("setLikedToLocalStorage");
       let updatedArr = likearr.map((posts) => {
         if (posts.hasOwnProperty(post_id)) {
           let arr = posts[post_id];
