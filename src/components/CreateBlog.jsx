@@ -26,6 +26,8 @@ const CreateBlog = () => {
   const [data, setData] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [resizedImage, setResizedImage] = useState(null);
+  const [additionalComponents, setAdditionalComponents] = useState([]);
+  let [id, setId] = useState(0);
   const headers = useMemo(
     () => ({
       Authorization: `${bearer}`,
@@ -122,6 +124,63 @@ const CreateBlog = () => {
     );
   };
 
+  const RemoveChild = (id) => {
+    const filteredComponents = additionalComponents.filter((child) => {
+      if (child.props.value !== id) return true;
+      return false;
+    });
+    setAdditionalComponents(filteredComponents);
+  };
+
+  const AddChild = () => {
+    const newComponent = (
+      <div className="blog-sub-container" value={id}>
+        <div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileInputChange}
+          />
+        </div>
+        <Input
+          width={"60rem"}
+          variant="flushed"
+          type="text"
+          value={blog.title}
+          className="input"
+          placeholder="Heading"
+          onChange={(e) =>
+            dispatch({
+              ...blog,
+              title: e.target.value,
+              type: "title",
+            })
+          }
+        />
+        <Textarea
+          name="blog"
+          id="blog"
+          className="blog"
+          value={blog.yourblog}
+          cols="12"
+          rows="12"
+          width={"60rem"}
+          placeholder="your blog"
+          onChange={(e) =>
+            dispatch({
+              ...blog,
+              yourblog: e.target.value,
+              type: "blog",
+            })
+          }
+        />
+        <button onClick={() => RemoveChild(id)}>Remove</button>
+      </div>
+    );
+    setAdditionalComponents([...additionalComponents, newComponent]);
+    setId(id + 1);
+  };
+
   return (
     <div className="blog-main-container">
       {
@@ -156,19 +215,50 @@ const CreateBlog = () => {
               />
             </div>
             <div>
-              <Textarea
-                name="blog"
-                id="blog"
-                className="blog"
-                value={blog.yourblog}
-                cols="129"
-                rows="25"
-                width={"60rem"}
-                placeholder="your blog"
-                onChange={(e) =>
-                  dispatch({ ...blog, yourblog: e.target.value, type: "blog" })
-                }
-              />
+              <button onClick={AddChild}>Add More</button>
+            </div>
+            <div>
+              <div className="blog-sub-container">
+                <div className="input-container">
+                  <label className="title">
+                    <Input
+                      width={"60rem"}
+                      variant="flushed"
+                      type="text"
+                      value={blog.title}
+                      className="input"
+                      placeholder="Heading"
+                      onChange={(e) =>
+                        dispatch({
+                          ...blog,
+                          title: e.target.value,
+                          type: "title",
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+                <div>
+                  <Textarea
+                    name="blog"
+                    id="blog"
+                    className="blog"
+                    value={blog.yourblog}
+                    cols="12"
+                    rows="12"
+                    width={"60rem"}
+                    placeholder="your blog"
+                    onChange={(e) =>
+                      dispatch({
+                        ...blog,
+                        yourblog: e.target.value,
+                        type: "blog",
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              {additionalComponents}
             </div>
           </div>
           <Button
