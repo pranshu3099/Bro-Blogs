@@ -36,11 +36,6 @@ const Posts = () => {
       const posts = likearr[0];
 
       let islikedArray = [];
-      console.log(
-        posts[postdata[0]?.posts?.posts_id].includes(
-          responseData?.data?.user?.id
-        )
-      );
       if (posts !== undefined) {
         if (posts.hasOwnProperty(postdata[0]?.posts?.posts_id)) {
           if (
