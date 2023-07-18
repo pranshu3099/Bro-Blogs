@@ -5,6 +5,7 @@ import { useAuthContext } from "../context/Provider";
 import axios from "axios";
 import Home from "./Home";
 import FileResizer from "react-image-file-resizer";
+import EditorComponent from "./Editor";
 import {
   Modal,
   ModalOverlay,
@@ -24,7 +25,7 @@ const CreateBlog = () => {
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const [data, setData] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState([]);
   const [resizedImage, setResizedImage] = useState(null);
   const [additionalComponents, setAdditionalComponents] = useState([]);
   let [id, setId] = useState(0);
@@ -59,12 +60,10 @@ const CreateBlog = () => {
         return action;
       case "title":
         return { ...state, title: action.title };
-      case "blog":
+      case "content":
         return { ...state, yourblog: action.yourblog };
       case "resolved":
         return action;
-      default:
-        throw new Error("error");
     }
   };
   const [blog, dispatch] = useReducer(blogReducer, {
@@ -89,96 +88,34 @@ const CreateBlog = () => {
       user_id: Number(responseData?.data?.user?.id),
       category_id: Number(selectedCategory),
       posts_id: Number(randomNum),
-      image: resizedImage,
+      // image: resizedImage,
     };
-
-    axios
-      .post("http://127.0.0.1:3000/createposts", data, { headers })
-      .then((response) => {
-        if (response.status === 200) {
-          setSubmit(true);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    console.log(data);
+    // axios
+    //   .post("http://127.0.0.1:3000/createposts", data, { headers })
+    //   .then((response) => {
+    //     if (response.status === 200) {
+    //       setSubmit(true);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);
   };
+  const handleRemovelist = (url) => {
+    let newfilearr = selectedFile.filter((img) => {
+      if (img !== url) return true;
+      return false;
+    });
+    setSelectedFile(newfilearr);
+  };
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
-    setSelectedFile(file);
-    FileResizer.imageFileResizer(
-      file,
-      300,
-      300,
-      "JPEG",
-      80,
-      0,
-      (uri) => {
-        setResizedImage(uri);
-      },
-      "base64"
-    );
-  };
-
-  const RemoveChild = (id) => {
-    const filteredComponents = additionalComponents.filter((child) => {
-      if (child.props.value !== id) return true;
-      return false;
-    });
-    setAdditionalComponents(filteredComponents);
-  };
-
-  const AddChild = () => {
-    const newComponent = (
-      <div className="blog-sub-container" value={id}>
-        <div>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileInputChange}
-          />
-        </div>
-        <Input
-          width={"60rem"}
-          variant="flushed"
-          type="text"
-          value={blog.title}
-          className="input"
-          placeholder="Heading"
-          onChange={(e) =>
-            dispatch({
-              ...blog,
-              title: e.target.value,
-              type: "title",
-            })
-          }
-        />
-        <Textarea
-          name="blog"
-          id="blog"
-          className="blog"
-          value={blog.yourblog}
-          cols="12"
-          rows="12"
-          width={"60rem"}
-          placeholder="your blog"
-          onChange={(e) =>
-            dispatch({
-              ...blog,
-              yourblog: e.target.value,
-              type: "blog",
-            })
-          }
-        />
-        <button onClick={() => RemoveChild(id)}>Remove</button>
-      </div>
-    );
-    setAdditionalComponents([...additionalComponents, newComponent]);
-    setId(id + 1);
+    setSelectedFile([...selectedFile, file.name]);
   };
 
   return (
@@ -198,7 +135,7 @@ const CreateBlog = () => {
                   width={"60rem"}
                   variant="flushed"
                   type="text"
-                  value={blog.title}
+                  value={blog?.title}
                   className="input"
                   placeholder="Title"
                   onChange={(e) =>
@@ -211,54 +148,29 @@ const CreateBlog = () => {
               <input
                 type="file"
                 accept="image/*"
+                id="files"
                 onChange={handleFileInputChange}
               />
             </div>
             <div>
-              <button onClick={AddChild}>Add More</button>
+              {
+                <ImageUrllist
+                  list={selectedFile}
+                  removelist={handleRemovelist}
+                />
+              }
             </div>
+
             <div>
               <div className="blog-sub-container">
-                <div className="input-container">
-                  <label className="title">
-                    <Input
-                      width={"60rem"}
-                      variant="flushed"
-                      type="text"
-                      value={blog.title}
-                      className="input"
-                      placeholder="Heading"
-                      onChange={(e) =>
-                        dispatch({
-                          ...blog,
-                          title: e.target.value,
-                          type: "title",
-                        })
-                      }
-                    />
-                  </label>
-                </div>
                 <div>
-                  <Textarea
-                    name="blog"
-                    id="blog"
-                    className="blog"
-                    value={blog.yourblog}
-                    cols="12"
-                    rows="12"
-                    width={"60rem"}
-                    placeholder="your blog"
-                    onChange={(e) =>
-                      dispatch({
-                        ...blog,
-                        yourblog: e.target.value,
-                        type: "blog",
-                      })
-                    }
+                  <EditorComponent
+                    reducer={blogReducer}
+                    blog={blog}
+                    dispatch={dispatch}
                   />
                 </div>
               </div>
-              {additionalComponents}
             </div>
           </div>
           <Button
@@ -280,7 +192,7 @@ const CreateBlog = () => {
                 <ModalHeader>Your blog</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
-                  <Text fontSize="30px">{blog.title}</Text>
+                  <Text fontSize="30px">{blog?.title}</Text>
                   <p>
                     {today.toLocaleDateString("en-US", monthOptions) +
                       " " +
@@ -289,7 +201,7 @@ const CreateBlog = () => {
                       " " +
                       today.getFullYear()}
                   </p>
-                  <Text fontSize="15px">{blog.yourblog}</Text>
+                  <Text fontSize="15px">{blog?.yourblog}</Text>
                 </ModalBody>
 
                 <ModalFooter>
@@ -308,6 +220,37 @@ const CreateBlog = () => {
       {submit && <Navigate to="/" />}
       {headers.Authorization === String(null) && <Navigate to="/Login" />}
     </div>
+  );
+};
+
+const ImageUrllist = ({ list, removelist }) => {
+  console.log(list);
+  const handleRemoveurl = (url) => {
+    removelist(url);
+  };
+  return (
+    <ul className="imgparent">
+      {list.map((url, index) => {
+        return (
+          <>
+            <li key={index} value={index} className="imglist">
+              {url}
+            </li>
+            <span
+              onClick={(e) => {
+                handleRemoveurl(url);
+              }}
+              style={{
+                cursor: "pointer",
+                fontSize: "20px",
+              }}
+            >
+              x
+            </span>
+          </>
+        );
+      })}
+    </ul>
   );
 };
 
