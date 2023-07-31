@@ -77,7 +77,9 @@ const Myprofile = () => {
     </>
   );
 };
-
+const HTMLRenderer = ({ htmlContent }) => {
+  return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+};
 const BlogPosts = ({ data, onHandleBlog }) => {
   const handleBlog = (e, post_id) => {
     onHandleBlog(e, post_id);
@@ -99,7 +101,7 @@ const BlogPosts = ({ data, onHandleBlog }) => {
             >
               {post.title}
             </h1>
-            <p>{post.content}</p>
+            <HTMLRenderer htmlContent={post?.parsed_content} />
           </div>
         </div>
       ))}
