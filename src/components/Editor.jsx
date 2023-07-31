@@ -4,22 +4,18 @@ import ReactMarkdown from "react-markdown";
 import "ace-builds/src-noconflict/mode-markdown";
 import "ace-builds/src-noconflict/theme-tomorrow_night";
 
-const EditorComponent = ({ reducer, blog, dispatch }) => {
-  const handleChange = (state, action) => {
-    reducer(state, action);
-  };
-
+const EditorComponent = ({ blog, dispatch }) => {
   return (
     <div className="editor-container">
       <AceEditor
         mode="markdown"
         theme="tomorrow_night"
-        value={blog?.yourblog || ""}
+        value={blog?.blogContent || ""}
         name="markdown-editor"
         editorProps={{ $blockScrolling: true }}
         className="markdown-editor"
         onChange={(e) => {
-          handleChange(blog, { ...blog, yourblog: e, type: "content" });
+          dispatch({ type: "content", payload: { blogContent: e } });
         }}
       />
     </div>
