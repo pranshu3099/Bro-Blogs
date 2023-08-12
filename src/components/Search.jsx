@@ -33,7 +33,7 @@ const Search = () => {
       clearTimeout(debouncerTimeId);
       debouncerTimeId = setTimeout(() => {
         axios
-          .get("http://127.0.0.1:8000/api/search/searchuser?q=" + searchUser, {
+          .get("http://localhost:8000/api/search/searchuser?q=" + searchUser, {
             headers,
           })
           .then((res) => {

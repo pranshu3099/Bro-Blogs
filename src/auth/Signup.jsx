@@ -155,7 +155,7 @@ const Signup = () => {
 
   function fetchdata(info) {
     axios
-      .post("http://127.0.0.1:3000/register", info, { headers })
+      .post("http://localhost:3000/register", info, { headers })
       .then((response) => {
         if (response.status === 200) {
           setAuth(true);

@@ -43,7 +43,7 @@ const CreateBlog = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:3000/getcategories", { headers })
+      .get("http://localhost:3000/getcategories", { headers })
       .then((response) => {
         if (response.status === 200) {
           setData(response.data);
@@ -100,7 +100,7 @@ const CreateBlog = () => {
       image: selectedFile,
     };
     axios
-      .post("http://127.0.0.1:3000/createposts", data, { headers })
+      .post("http://localhost:3000/createposts", data, { headers })
       .then((response) => {
         if (response.status === 200) {
           setSubmit(true);
@@ -169,7 +169,7 @@ const CreateBlog = () => {
     });
     try {
       const response = axios
-        .post("http://127.0.0.1:3000/api/uploadimage", formData, {
+        .post("http://localhost:3000/api/uploadimage", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `${bearer}`,

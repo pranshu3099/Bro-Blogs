@@ -67,7 +67,7 @@ const Login = () => {
 
   function fetchdata() {
     axios
-      .post("http://127.0.0.1:3000/login", data)
+      .post("http://localhost:3000/login", data)
       .then((response) => {
         if (response.status === 200) {
           setAuth(true);

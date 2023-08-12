@@ -22,7 +22,7 @@ const Myprofile = () => {
     [bearer]
   );
   const { data, err, loading } = useFetch(
-    `http://127.0.0.1:3000/uerPosts/${responseData?.data?.user?.id}`,
+    `http://localhost:3000/uerPosts/${responseData?.data?.user?.id}`,
     "",
     "GET",
     headers,
@@ -35,7 +35,7 @@ const Myprofile = () => {
   }, [userpost, navigate]);
   const handleBlog = (e, post_id) => {
     axios
-      .get(`http://127.0.0.1:3000/getsinglepost/${post_id}`, {
+      .get(`http://localhost:3000/getsinglepost/${post_id}`, {
         headers,
       })
       .then((res) => {
