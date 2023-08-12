@@ -247,9 +247,10 @@
 
 .post-title p {
   overflow: hidden;
-  height: 72px;
+  height: 80px;
   margin: 20px;
-  width: 700px;
+  width: 670px;
+  font-size: large;
 }
 .post-title img {
   width: 700px;
@@ -429,7 +430,7 @@
 .comment-list-container ul {
   position: fixed;
   width: 20%;
-  height: 100vh;
+  height: 120vh;
   background-color: #abcae9;
   top: 80px;
   /* text-align: center; */
@@ -519,6 +520,7 @@ hr {
 
 .article {
   padding: 2px;
+  height: auto;
 }
 
 .article p {
@@ -566,4 +568,20 @@ hr {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+@media only screen and (max-width: 546px) {
+  div.post-title > div > p {
+    width: 100%;
+    height: 15rem;
+    margin-top: 10px;
+    margin-left: 0;
+  }
+
+  .post-container {
+    width: 80%;
+  }
+  .comment-list-container ul {
+    height: 150vh;
+  }
 }
