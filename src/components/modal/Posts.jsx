@@ -10,16 +10,17 @@ import { Button, Input, Textarea } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 const Posts = () => {
   const location = useLocation();
-  const { postdata } = location.state || {};
+  let { postdata, status } = location.state || [];
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
-  const { responseData } = useAuthContext();
-  const [likes, setLikes] = useState(0);
+  let { responseData, auth, setAuth, userResponseData } = useAuthContext();
+  const [likes, setLikes] = useState(null);
   const [result, setResult] = useState([]);
   const [sendComment, setSendComment] = useState(false);
   const [Yourcomment, setYourComment] = useState("");
   const [yourCommentList, setYourCommentList] = useState([]);
   const navigate = useNavigate();
+
   const headers = useMemo(
     () => ({
       Authorization: `${bearer}`,
@@ -27,6 +28,20 @@ const Posts = () => {
     }),
     [bearer]
   );
+  if (!Object.keys(userResponseData || {}).length) {
+    userResponseData = JSON.parse(
+      localStorage.getItem("user_response_data") || null
+    );
+  }
+  if (!postdata) {
+    postdata = JSON.parse(localStorage.getItem("postdata"));
+    const queryParams = new URLSearchParams(location.search);
+    userResponseData = JSON.parse(decodeURIComponent(queryParams.get("data")));
+    localStorage.setItem(
+      "user_response_data",
+      JSON.stringify(userResponseData)
+    );
+  }
 
   useEffect(() => {
     if (responseData !== undefined) {
@@ -36,11 +51,14 @@ const Posts = () => {
       const posts = likearr[0];
 
       let islikedArray = [];
+
       if (posts !== undefined) {
-        if (posts.hasOwnProperty(postdata[0]?.posts?.posts_id)) {
+        if (posts.hasOwnProperty(postdata?.[0]?.posts?.posts_id)) {
           if (
             posts[postdata[0]?.posts?.posts_id].includes(
-              responseData?.data?.user?.id
+              Object.keys(responseData).length
+                ? responseData?.data?.user?.id
+                : userResponseData?.id
             )
           ) {
             console.log("first");
@@ -54,18 +72,22 @@ const Posts = () => {
 
       setResult(islikedArray);
     }
-  }, [postdata]);
+  }, []);
 
   useEffect(() => {
-    axios
-      .get(
-        `http://127.0.0.1:3000/getcomments/${postdata[0]?.posts?.posts_id}`,
-        {
-          headers,
-        }
-      )
+    fetch(
+      `http://localhost:3000/getcomments/${postdata?.[0]?.posts?.posts_id}`,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      }
+    )
+      .then((res) => res.json())
       .then((res) => {
-        setYourCommentList(res.data.comments);
+        setYourCommentList(res.comments);
       })
       .catch((err) => {
         console.log(err);
@@ -120,39 +142,37 @@ const Posts = () => {
   }
 
   const handleLike = (e, post_id, user_id, likes_count) => {
-    if (headers.Authorization !== String(null)) {
-      if (e.target.attributes.src.textContent === heart) {
-        e.target.attributes.src.textContent = like;
-        removeLikedFromLocalStorage(user_id, post_id);
-        axios
-          .post(
-            `http://127.0.0.1:3000/removeLikes/${post_id}/users/${user_id}`,
-            {
-              headers,
-            }
-          )
-          .then((res) => {
-            setLikes(res?.data?.likes);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        e.target.attributes.src.textContent = heart;
-        setLikedToLocalStorage(user_id, post_id);
-        axios
-          .post(`http://127.0.0.1:3000/addlikes/${post_id}/users/${user_id}`, {
-            headers,
-          })
-          .then((res) => {
-            setLikes(res?.data?.likes);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
+    if (e.target.attributes.src.textContent === heart) {
+      e.target.attributes.src.textContent = like;
+      removeLikedFromLocalStorage(user_id, post_id);
+
+      fetch(`http://localhost:3000/removeLikes/${post_id}/users/${user_id}`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          setLikes(res?.likes);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      navigate("/Login");
+      e.target.attributes.src.textContent = heart;
+      setLikedToLocalStorage(user_id, post_id);
+      fetch(`http://localhost:3000/addlikes/${post_id}/users/${user_id}`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          setLikes(res?.likes);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
 
@@ -163,27 +183,33 @@ const Posts = () => {
   }
 
   const handleSendComment = () => {
-    if (headers.Authorization !== String(null)) {
-      let comment = {};
-      if (Yourcomment === "" || checkForSpaces()) {
-        alert("comment is required");
-      } else {
-        comment = {
-          user_id: responseData?.data?.user?.id,
-          posts_id: postdata[0].posts?.posts_id,
-          comment: Yourcomment,
-        };
-        setYourComment("");
-        axios
-          .post("http://127.0.0.1:3000/comment/", comment, { headers })
-          .then((res) => console.log(res))
-          .catch((err) => console.log(err));
-      }
-      comment["name"] = responseData?.data?.user?.name;
-      console.log(comment);
-      setYourCommentList([...yourCommentList, comment]);
+    let comment = {};
+    if (Yourcomment === "" || checkForSpaces()) {
+      alert("comment is required");
     } else {
-      navigate("/Login");
+      comment = {
+        user_id: Object.keys(responseData).length
+          ? responseData?.data?.user?.id
+          : userResponseData?.id,
+        posts_id: postdata[0].posts?.posts_id,
+        comment: Yourcomment,
+      };
+      setYourComment("");
+
+      fetch("http://localhost:3000/comment/", {
+        body: JSON.stringify(comment),
+        headers,
+        method: "POST",
+        credentials: "include",
+      })
+        .then((r) => r.json())
+
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+      comment["name"] = Object.keys(responseData).length
+        ? responseData?.data?.user?.name
+        : userResponseData?.name;
+      setYourCommentList([...yourCommentList, comment]);
     }
   };
 
@@ -208,10 +234,11 @@ const Posts = () => {
             onhandleLikeChange={handleLike}
             onhandleComment={handleComment}
             commentcount={yourCommentList}
-            count={likes}
             result={result}
             responseData={responseData}
             likes={likes}
+            userResponseData={userResponseData}
+            status={status}
           />
         ) : null}
       </div>
@@ -270,6 +297,9 @@ const CommentList = ({ usercomments }) => {
     </>
   );
 };
+const HTMLRenderer = ({ htmlContent }) => {
+  return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+};
 
 const BlogPosts = ({
   posts,
@@ -279,6 +309,8 @@ const BlogPosts = ({
   responseData,
   likes,
   commentcount,
+  userResponseData,
+  status,
 }) => {
   const handleLike = (e, post_id, user_id, likes_count) => {
     onhandleLikeChange(e, post_id, user_id, likes_count);
@@ -286,54 +318,63 @@ const BlogPosts = ({
   const handleComment = (e, post_id) => {
     onhandleComment(e, post_id);
   };
+  const CLIENT_ID = "e3bdfbba37dd3ad44a50";
+  const REDIRECT_URL = "http://localhost:3000/api/auth/github";
+  let path = "posts";
   return (
     <>
       {posts.map((post, index) => (
         <div className="post-container" key={IDBIndex}>
           <div className="date-name-container">
-            <p>{post?.posts?.user?.name}</p>
-            <p>{post?.posts?.created_at.substring(0, 9)}</p>
+            {/* <p>{post?.posts?.user?.name}</p>
+            <p>{post?.posts?.created_at.substring(0, 9)}</p> */}
           </div>
-          <div className="post-icons-container">
-            {
+
+          {status === true ? (
+            <div className="post-icons-container">
+              {
+                <img
+                  src={
+                    result.length
+                      ? result[index] === false
+                        ? like
+                        : heart
+                      : like
+                  }
+                  alt=""
+                  className="post-icons"
+                  onClick={(e) =>
+                    handleLike(
+                      e,
+                      post?.posts?.posts_id,
+                      Object.keys(responseData).length
+                        ? responseData?.data?.user?.id
+                        : userResponseData?.id,
+                      post?.posts?.likes_count
+                    )
+                  }
+                  id="likes"
+                />
+              }
+              <p>{likes !== null ? likes : post?.posts?.likes_count}</p>
               <img
-                src={
-                  result.length
-                    ? result[index] === false
-                      ? like
-                      : heart
-                    : like
-                }
+                src={comment}
                 alt=""
                 className="post-icons"
-                onClick={(e) =>
-                  handleLike(
-                    e,
-                    post?.posts?.posts_id,
-                    responseData?.data?.user?.id,
-                    post?.posts?.likes_count
-                  )
-                }
-                id="likes"
+                onClick={(e) => handleComment(e, post?.posts?.posts_id)}
               />
-            }
-            <p>{likes ? likes : post?.posts?.likes_count}</p>
-            <img
-              src={comment}
-              alt=""
-              className="post-icons"
-              onClick={(e) => handleComment(e, post?.posts?.posts_id)}
-            />
-            <p>{commentcount.length}</p>
-          </div>
+              <p>{commentcount.length}</p>
+            </div>
+          ) : (
+            <a
+              href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URL}?path=${path}&scope=user:email`}
+            >
+              Login via github to comment and like
+            </a>
+          )}
           <div className="post-title">
             <h1>{post?.posts?.title}</h1>
-          </div>
-          <div className="post-image">
-            <img src={post?.posts?.image} alt="" />
-          </div>
-          <div className="post-content">
-            <p>{post.posts.content}</p>
+            <HTMLRenderer htmlContent={post?.posts?.parsed_content} />
           </div>
         </div>
       ))}
