@@ -29,7 +29,10 @@ const Home = () => {
     [userpost]
   );
   useEffect(() => {
-    localStorage.setItem("postdata", JSON.stringify(userpost?.postdata));
+    let data = JSON.parse(localStorage.getItem("postdata"));
+    if (!data.length || userpost.length) {
+      localStorage.setItem("postdata", JSON.stringify(userpost));
+    }
     if (Object.keys(userpost).length) {
       navigate("/posts", { state: userpost });
     }
@@ -41,16 +44,10 @@ const Home = () => {
         withCredentials: true,
       })
       .then((res) => {
-        setUserPost({
-          status: true,
-          postdata: res?.data,
-        });
+        setUserPost(res?.data);
       })
       .catch((err) => {
-        setUserPost({
-          status: false,
-          postdata: err?.response?.data,
-        });
+        setUserPost(err?.response?.data);
       });
   };
   return (
