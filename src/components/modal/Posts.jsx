@@ -10,7 +10,7 @@ import { Button, Input, Textarea } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 const Posts = () => {
   const location = useLocation();
-  let { postdata, status } = location.state || [];
+  let postdata = location.state || [];
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   let { responseData, auth, setAuth, userResponseData } = useAuthContext();
@@ -19,8 +19,7 @@ const Posts = () => {
   const [sendComment, setSendComment] = useState(false);
   const [Yourcomment, setYourComment] = useState("");
   const [yourCommentList, setYourCommentList] = useState([]);
-  const navigate = useNavigate();
-
+  const [authStatus, setAuthStatus] = useState(null);
   const headers = useMemo(
     () => ({
       Authorization: `${bearer}`,
@@ -32,8 +31,12 @@ const Posts = () => {
     userResponseData = JSON.parse(
       localStorage.getItem("user_response_data") || null
     );
+    postdata = JSON.parse(localStorage.getItem("postdata"));
   }
-  if (!postdata) {
+  if (
+    !postdata &&
+    JSON.parse(localStorage.getItem("user_response_data")) === null
+  ) {
     postdata = JSON.parse(localStorage.getItem("postdata"));
     const queryParams = new URLSearchParams(location.search);
     userResponseData = JSON.parse(decodeURIComponent(queryParams.get("data")));
@@ -92,7 +95,24 @@ const Posts = () => {
       .catch((err) => {
         console.log(err);
       });
+
+    fetch("http://localhost:3000/tokenvalid", {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res);
+        setAuthStatus(true);
+      })
+      .catch((err) => {
+        setAuthStatus(false);
+      });
   }, []);
+
   function setLikedToLocalStorage(user_id, post_id) {
     let likearr = localStorage.getItem("posts")
       ? JSON.parse(localStorage.getItem("posts"))
@@ -238,7 +258,7 @@ const Posts = () => {
             responseData={responseData}
             likes={likes}
             userResponseData={userResponseData}
-            status={status}
+            status={authStatus}
           />
         ) : null}
       </div>
