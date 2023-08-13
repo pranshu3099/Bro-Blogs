@@ -247,9 +247,9 @@
 
 .post-title p {
   overflow: hidden;
-  height: 80px;
+  /* height: 80px; */
   margin: 20px;
-  width: 670px;
+  /* width: 670px; */
   font-size: large;
 }
 .post-title img {
@@ -570,6 +570,19 @@ hr {
   align-items: center;
 }
 
+.image-wrapper {
+  width: 300px;
+  height: 200px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.image-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
 @media only screen and (max-width: 546px) {
   div.post-title > div > p {
     width: 100%;
