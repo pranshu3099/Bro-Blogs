@@ -20,8 +20,6 @@ import {
   Text,
   useDisclosure,
   Input,
-  Textarea,
-  Select,
 } from "@chakra-ui/react";
 import { upload } from "@testing-library/user-event/dist/upload";
 const CreateBlog = () => {
@@ -82,9 +80,7 @@ const CreateBlog = () => {
   const [submit, setSubmit] = useState(false);
   const today = new Date();
   const monthOptions = { month: "long" };
-  // console.log(blog);
   const handleSubmit = (e) => {
-    console.log(blog);
     e.preventDefault();
     if (blog.title === "" && blog.blogContent === "") {
       alert("please write your blog");
@@ -160,6 +156,13 @@ const CreateBlog = () => {
   const handleGeturl = (e) => {
     let textToCopy = e.target.previousElementSibling.textContent;
     copyTextToClipboard(textToCopy);
+
+    e.target.style.display = "none";
+    e.target.nextElementSibling.style.display = "block";
+    setTimeout(() => {
+      e.target.style.display = "block";
+      e.target.nextElementSibling.style.display = "none";
+    }, 1000);
   };
 
   const uploadImages = () => {
@@ -304,7 +307,6 @@ const ImageUrllist = ({ list, removelist, preview, imgurl, copyurl }) => {
   const handleRemoveurl = (img, list_img) => {
     removelist(img, list_img);
   };
-
   const handleurl = (e) => {
     imgurl(e);
   };
@@ -331,19 +333,26 @@ const ImageUrllist = ({ list, removelist, preview, imgurl, copyurl }) => {
             <p style={{ display: "none" }} value={index}>
               {copyurl[index]?.path}
             </p>
-            <img
-              src={url}
-              alt=""
-              style={{
-                cursor: "pointer",
-                width: "17px",
-                margin: "6px",
-              }}
-              id="imgurl"
-              onClick={(e) => {
-                handleurl(e);
-              }}
-            />
+            {copyurl.length ? (
+              <img
+                src={url}
+                alt=""
+                style={{
+                  cursor: "pointer",
+                  width: "17px",
+                  margin: "6px",
+                }}
+                id="imgurl"
+                onClick={(e) => {
+                  handleurl(e);
+                }}
+              />
+            ) : (
+              ""
+            )}
+            <p id="copied" style={{ display: "none" }}>
+              copied..
+            </p>
           </>
         );
       })}
