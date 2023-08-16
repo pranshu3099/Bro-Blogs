@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [show, setShow] = useState(false);
-  const { isloggedout, setIsLoggedOut } = useAuthContext();
+  const { setAuth } = useAuthContext();
   const getBearerToken = () => localStorage.getItem("Bearer");
   const [bearer] = useState(getBearerToken);
   const navigate = useNavigate();
@@ -33,6 +33,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("Bearer");
+    setAuth(false);
     navigate("/Login");
   };
   return (
