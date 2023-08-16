@@ -130,7 +130,7 @@ const CreateBlog = () => {
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
-    setSelectedFile([...selectedFile, file.name]);
+    setSelectedFile([...selectedFile, file]);
     let reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview([...imagePreview, reader.result]);
@@ -174,7 +174,6 @@ const CreateBlog = () => {
       const response = axios
         .post("http://localhost:3000/api/uploadimage", formData, {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `${bearer}`,
           },
         })
@@ -218,15 +217,18 @@ const CreateBlog = () => {
                 />
               </label>
             </div>
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                id="files"
-                onChange={handleFileInputChange}
-                name="images"
-              />
-            </div>
+            <form method="post" enctype="multipart/form-data">
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="files"
+                  onChange={handleFileInputChange}
+                  name="images"
+                  multiple
+                />
+              </div>
+            </form>
             <div>
               {
                 <ImageUrllist
