@@ -10,8 +10,6 @@ import { useAuthContext } from "../context/Provider";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 const Login = () => {
-  const getBearerToken = () => localStorage.getItem("Bearer");
-  const [bearer] = useState(getBearerToken);
   const navigate = useNavigate();
   let [data, setData] = React.useState({
     email: "",
@@ -23,13 +21,6 @@ const Login = () => {
     password: "",
   });
   let { auth, setAuth, setRes, responseData } = useAuthContext();
-  const headers = useMemo(
-    () => ({
-      Authorization: ` ${bearer}`,
-      "Content-Type": "application/json",
-    }),
-    [bearer]
-  );
   let changeIcon = (e, icon) => {
     if (icon === eye) {
       e.target.attributes.src.textContent = hidden;
